@@ -13,6 +13,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.Scanner;
+import java.util.Set;
+import java.util.concurrent.ThreadLocalRandom;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -20,6 +22,7 @@ import javax.swing.JPanel;
 
 import org.simbrain.network.connections.AllToAll;
 import org.simbrain.network.connections.ConnectNeurons;
+import org.simbrain.network.connections.ConnectionUtilities.SynapseParameterGetter;
 import org.simbrain.network.connections.Sparse;
 import org.simbrain.network.core.Network;
 import org.simbrain.network.core.Neuron;
@@ -143,6 +146,7 @@ public class MainSimulation {
     private static final double INHIB_REF = 2.0; // ms
     private static final double EXCITE_REF = 3.0; // ms
     private static final double I_BG = 13.5; // nA
+    private static final double RESET_POTENTIAL = 13.5; // mV, use 10 for larger sims
 
     /*
      * Homeostatic and Intrinsic plasticity (IP) parameters
@@ -200,7 +204,12 @@ public class MainSimulation {
         Integer[][] delays = new Integer[LAIP_RES.size()][LAIP_RES.size()];
 
         delays = (Integer[][]) LAIP_RES_SYNS.getMatrixOfValues(
-                (Synapse s) -> s.getDelay(), delays);
+                new SynapseParameterGetter<Integer>() {
+                    @Override
+                    public Integer getParameterFromSynapse(Synapse synapse) {
+                        return synapse.getDelay();
+                    }
+                }, delays);
         double[][] ddlys = new double[LAIP_RES.size()][LAIP_RES.size()];
         for (int i = 0; i < delays.length; i++) {
             for (int j = 0; j < delays.length; j++) {
@@ -453,6 +462,7 @@ public class MainSimulation {
             lif.setBeta(BETA_IP);
             lif.setLowFRBoundary(LOW_FR_BOUNDARY);
             lif.setPrefFR(DEFAULT_INIT_PFR);
+            lif.setResetPotential(RESET_POTENTIAL);
 
             if (Math.random() < INHIB_RATIO) {
                 neuron.setPolarity(Polarity.INHIBITORY);
@@ -602,6 +612,44 @@ public class MainSimulation {
                 * GRID_SPACE)));
         neuron.setZ(randi.nextInt((int) (Math.sqrt(NUM_NEURONS)
                 * GRID_SPACE)));
+    }
+    
+    private static void rewireSynapseGroup(SynapseGroup synGrp, int iter) {
+        List<Neuron> targetNeurons = new ArrayList<Neuron>(synGrp
+                .getTargetNeurons());
+        List<Neuron> sourceNeurons = new ArrayList<Neuron>(synGrp
+                .getSourceNeurons());
+        Collections.shuffle(sourceNeurons);
+        ThreadLocalRandom tlr = ThreadLocalRandom.current();
+        for (int k = 0; k < iter; k++) {
+            for (int i = 0; i < sourceNeurons.size() - 1; i++) {
+                Neuron n1 = sourceNeurons.get(i);
+                Neuron n2 = sourceNeurons.get(i + 1);
+
+                List<Neuron> n1Targets = new ArrayList<Neuron>(n1.getFanOut()
+                        .keySet());
+                n1Targets.retainAll(targetNeurons);
+                List<Neuron> n2Targets = new ArrayList<Neuron>(n2.getFanOut()
+                        .keySet());
+                n2Targets.retainAll(targetNeurons);
+
+                Neuron n3 = n1Targets.get(tlr.nextInt(n1Targets.size()));
+                Synapse toRemove1 = n1.getFanOut().get(n3);
+                Neuron n4 = n2Targets.get(tlr.nextInt(n2Targets.size()));
+                Synapse toRemove2 = n2.getFanOut().get(n4);
+
+                Synapse s1 = Synapse.copySynapseWithNewSrcTarg(toRemove1, n1,
+                        n4);
+                Synapse s2 = Synapse.copySynapseWithNewSrcTarg(toRemove2, n2,
+                        n3);
+
+                NETWORK.removeSynapse(toRemove1);
+                NETWORK.removeSynapse(toRemove2);
+
+                synGrp.addSynapseUnsafe(s1);
+                synGrp.addSynapseUnsafe(s2);
+            }
+        }
     }
 
     private static double[][] getData(String filename) {

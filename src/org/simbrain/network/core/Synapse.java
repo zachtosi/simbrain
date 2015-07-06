@@ -254,6 +254,13 @@ public class Synapse {
         s.initSpikeResponder();
         isTemplate = s.isTemplate;
     }
+    
+    public static Synapse copySynapseWithNewSrcTarg(final Synapse s,
+            final Neuron src, final Neuron target) {
+        Synapse newSyn = new Synapse(s);
+        newSyn.setSourceAndTarget(src, target);
+        return newSyn;
+    }
 
     /**
      * Makes a deep copy of a template synapse (one with no source or target).
