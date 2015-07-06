@@ -28,6 +28,7 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.simbrain.workspace.gui.ComponentPanel;
+import org.simbrain.workspace.gui.GuiComponent;
 import org.simbrain.workspace.updater.ComponentUpdatePart;
 
 /**

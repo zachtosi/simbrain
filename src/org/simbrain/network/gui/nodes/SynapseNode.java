@@ -30,11 +30,6 @@ import org.piccolo2d.PNode;
 import org.piccolo2d.nodes.PPath;
 import org.simbrain.network.core.Synapse;
 import org.simbrain.network.gui.NetworkPanel;
-import org.simbrain.network.gui.actions.edit.CopyAction;
-import org.simbrain.network.gui.actions.edit.CutAction;
-import org.simbrain.network.gui.actions.edit.DeleteAction;
-import org.simbrain.network.gui.actions.edit.PasteAction;
-import org.simbrain.network.gui.actions.synapse.SetSynapsePropertiesAction;
 import org.simbrain.network.gui.dialogs.synapse.SynapseDialog;
 
 /**

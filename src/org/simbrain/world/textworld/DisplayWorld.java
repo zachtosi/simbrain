@@ -19,7 +19,6 @@
 package org.simbrain.world.textworld;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.simbrain.util.Utils;

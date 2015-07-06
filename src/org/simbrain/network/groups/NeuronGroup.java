@@ -33,7 +33,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import org.simbrain.network.core.Network;
 import org.simbrain.network.core.Neuron;
 import org.simbrain.network.core.NeuronUpdateRule;
-import org.simbrain.network.core.SpikingNeuronUpdateRule;
 import org.simbrain.network.core.Synapse;
 import org.simbrain.network.layouts.GridLayout;
 import org.simbrain.network.layouts.Layout;

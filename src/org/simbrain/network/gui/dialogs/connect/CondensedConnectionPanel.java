@@ -25,7 +25,6 @@ import javax.swing.BorderFactory;
 import javax.swing.Box;
 
 import org.simbrain.network.connections.Sparse;
-import org.simbrain.network.connections.Sparse;
 import org.simbrain.network.groups.NeuronGroup;
 import org.simbrain.network.groups.SynapseGroup;
 import org.simbrain.network.gui.NetworkPanel;

@@ -18,12 +18,9 @@
  */
 package org.simbrain.network.synapse_update_rules;
 
-import java.util.concurrent.ThreadLocalRandom;
-
 import org.simbrain.network.core.SpikingNeuronUpdateRule;
 import org.simbrain.network.core.Synapse;
 import org.simbrain.network.core.SynapseUpdateRule;
-import org.simbrain.network.neuron_update_rules.IntegrateAndFireRule;
 
 /**
  * <b>STDPSynapse</b> models spike time dependent plasticity.

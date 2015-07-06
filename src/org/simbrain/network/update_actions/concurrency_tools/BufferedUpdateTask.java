@@ -18,10 +18,7 @@
  */
 package org.simbrain.network.update_actions.concurrency_tools;
 
-import java.util.Random;
-
 import org.simbrain.network.core.Neuron;
-import org.simbrain.network.core.Synapse;
 
 /**
  * 

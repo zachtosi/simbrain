@@ -28,7 +28,6 @@ import javax.swing.JPanel;
 
 import org.simbrain.network.core.Neuron;
 import org.simbrain.network.core.Synapse;
-import org.simbrain.network.listeners.NetworkAdapter;
 import org.simbrain.network.util.SimnetUtils;
 import org.simbrain.util.table.NumericTable;
 import org.simbrain.util.table.SimbrainJTable;

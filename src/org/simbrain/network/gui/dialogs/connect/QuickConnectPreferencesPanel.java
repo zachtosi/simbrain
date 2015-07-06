@@ -30,11 +30,10 @@ import org.simbrain.network.connections.ConnectNeurons;
 import org.simbrain.network.connections.OneToOne;
 import org.simbrain.network.connections.QuickConnectionManager;
 import org.simbrain.network.connections.Sparse;
-import org.simbrain.network.groups.SynapseGroup;
 import org.simbrain.network.gui.NetworkPanel;
 import org.simbrain.network.gui.dialogs.connect.connector_panels.AllToAllPanel;
-import org.simbrain.network.gui.dialogs.connect.connector_panels.SparseConnectionPanel;
 import org.simbrain.network.gui.dialogs.connect.connector_panels.OneToOnePanel;
+import org.simbrain.network.gui.dialogs.connect.connector_panels.SparseConnectionPanel;
 import org.simbrain.util.LabelledItemPanel;
 import org.simbrain.util.StandardDialog;
 

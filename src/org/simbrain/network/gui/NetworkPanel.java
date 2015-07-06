@@ -64,7 +64,6 @@ import org.piccolo2d.event.PInputEventListener;
 import org.piccolo2d.event.PMouseWheelZoomEventHandler;
 import org.piccolo2d.util.PBounds;
 import org.piccolo2d.util.PPaintContext;
-import org.simbrain.network.NetworkComponent;
 import org.simbrain.network.connections.QuickConnectionManager;
 import org.simbrain.network.core.Network;
 import org.simbrain.network.core.NetworkTextObject;
@@ -145,11 +144,6 @@ import org.simbrain.util.genericframe.GenericFrame;
 import org.simbrain.util.genericframe.GenericJDialog;
 import org.simbrain.util.widgets.EditablePanel;
 import org.simbrain.util.widgets.ToggleButton;
-import org.simbrain.workspace.PotentialConsumer;
-import org.simbrain.workspace.PotentialProducer;
-import org.simbrain.workspace.Workspace;
-import org.simbrain.workspace.gui.CouplingMenuConsumer;
-import org.simbrain.workspace.gui.CouplingMenuProducer;
 
 /**
  * Contains a piccolo PCanvas that maintains a visual representation of the

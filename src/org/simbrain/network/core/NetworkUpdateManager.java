@@ -149,7 +149,7 @@ public class NetworkUpdateManager {
      * @param group
      *            the group being removed
      */
-    private void removeGroupAction(Group group) {
+    public void removeGroupAction(Group group) {
         NetworkUpdateAction toDelete = null;
         for (NetworkUpdateAction action : actionList) {
             if (action instanceof UpdateGroup) {
@@ -161,7 +161,6 @@ public class NetworkUpdateManager {
         if (toDelete != null) {
             removeAction(toDelete);
         }
-
     }
 
     /**

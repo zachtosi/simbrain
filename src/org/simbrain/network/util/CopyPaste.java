@@ -26,7 +26,6 @@ import org.simbrain.network.core.NetworkTextObject;
 import org.simbrain.network.core.Neuron;
 import org.simbrain.network.core.Synapse;
 import org.simbrain.network.groups.CopyableGroup;
-import org.simbrain.network.groups.NeuronGroup;
 
 /**
  * <b>CopyPaste</b> provides utilities for creating copies of arbitrary

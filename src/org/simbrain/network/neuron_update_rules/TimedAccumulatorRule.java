@@ -4,8 +4,6 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import org.simbrain.network.core.Network.TimeType;
 import org.simbrain.network.core.Neuron;
-import org.simbrain.network.core.NeuronUpdateRule;
-import org.simbrain.network.core.SpikingNeuronUpdateRule;
 import org.simbrain.network.core.Synapse;
 
 public class TimedAccumulatorRule extends SpikingThresholdRule {

@@ -19,7 +19,6 @@
 package org.simbrain.network.listeners;
 
 import java.util.Collection;
-import java.util.List;
 
 import org.simbrain.network.core.Neuron;
 import org.simbrain.network.core.Synapse;

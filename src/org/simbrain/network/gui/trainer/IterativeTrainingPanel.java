@@ -22,11 +22,8 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.Window;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 
 import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
 
 import org.simbrain.network.gui.NetworkPanel;
 import org.simbrain.network.trainers.IterableTrainer;

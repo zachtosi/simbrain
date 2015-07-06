@@ -38,12 +38,10 @@ public abstract class SpikingNeuronUpdateRule extends NeuronUpdateRule {
 
     /** Time of last spike. */
     private double lastSpikeTime;
-
-    /**
-     * An aux value for applied inputs to the neuron (eg injected current)
-     * usable across all spiking neuron update rules.
-     */
-    private double appliedInput = 0.0;
+    
+    private int spikeCounter = 0;
+    
+    private double startTime = 0;
 
     @Override
     public void clear(Neuron neuron) {
@@ -72,6 +70,7 @@ public abstract class SpikingNeuronUpdateRule extends NeuronUpdateRule {
     public void setHasSpiked(final boolean hasSpiked, final Neuron neuron) {
         if (hasSpiked) {
             lastSpikeTime = neuron.getNetwork().getTime();
+            spikeCounter++;
         }
     }
 
@@ -80,6 +79,20 @@ public abstract class SpikingNeuronUpdateRule extends NeuronUpdateRule {
      */
     public double getLastSpikeTime() {
         return lastSpikeTime;
+    }
+
+    public void resetCounter(final Neuron neuron) {
+        spikeCounter = 0;
+        startTime = neuron.getNetwork().getTime();
+    }
+
+    public int getSpikeCount() {
+        return spikeCounter;
+    }
+
+    public double getFrequency(final Neuron neuron) {
+        return 1000 * (spikeCounter / (neuron.getNetwork().getTime()
+                - startTime));
     }
 
     /**
@@ -104,25 +117,5 @@ public abstract class SpikingNeuronUpdateRule extends NeuronUpdateRule {
     public final boolean isSpikingNeuron() {
         return true;
     }
-
-//    /**
-//     * @return the input being injected into this neuron update rule, if any.
-//     */
-//    public double getAppliedInput() {
-//        return appliedInput;
-//    }
-//
-//    /**
-//     * Allows external objects to set the background applied input to this
-//     * neuron. This allows inputs to be passed through the rule's update without
-//     * directly setting the activation. It is much more practical for spiking
-//     * neurons for which it makes much more sense to inject current as input
-//     * since the update rule is in charge of whether or not the neuron spikes.
-//     * @param appliedInput the background stimulation being applied or
-//     *  "injected" into this neuron.
-//     */
-//    public void setAppliedInput(double appliedInput) {
-//        this.appliedInput = appliedInput;
-//    }
 
 }

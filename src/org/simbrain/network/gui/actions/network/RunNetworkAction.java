@@ -20,7 +20,6 @@ package org.simbrain.network.gui.actions.network;
 
 import java.awt.event.ActionEvent;
 import java.util.concurrent.Executors;
-import java.util.concurrent.locks.ReentrantLock;
 
 import javax.swing.AbstractAction;
 

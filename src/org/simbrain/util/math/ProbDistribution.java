@@ -30,9 +30,7 @@ import umontreal.iro.lecuyer.probdist.UniformDist;
 import umontreal.iro.lecuyer.randvar.ExponentialGen;
 import umontreal.iro.lecuyer.randvar.GammaGen;
 import umontreal.iro.lecuyer.randvar.LognormalGen;
-import umontreal.iro.lecuyer.randvar.NormalGen;
 import umontreal.iro.lecuyer.randvar.ParetoGen;
-import umontreal.iro.lecuyer.randvar.UniformGen;
 import umontreal.iro.lecuyer.rng.LFSR113;
 import umontreal.iro.lecuyer.rng.RandomStream;
 

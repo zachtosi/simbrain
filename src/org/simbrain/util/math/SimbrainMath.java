@@ -24,9 +24,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import cern.colt.Arrays;
 import umontreal.iro.lecuyer.rng.LFSR258;
 import umontreal.iro.lecuyer.rng.RandomStream;
+import cern.colt.Arrays;
 
 /**
  * <b>SimbrainMath</b> is the math functions used in simbrain.

@@ -1011,7 +1011,7 @@ public class SynapseGroup extends Group {
         }
         return weightMatrix;
     }
-
+    
     /**
      * A more compressed version of a weight matrix for cases where a weight
      * matrix is needed, but may cause memory issues if fully instantiated. Eg,
@@ -1078,6 +1078,49 @@ public class SynapseGroup extends Group {
         // And sort the table
         Arrays.sort(pairs, rowColOrderer);
         return pairs;
+    }
+    
+    /**
+     * A more compressed version of a weight matrix for cases where a weight
+     * matrix is needed, but may cause memory issues if fully instantiated. Eg,
+     * for very sparse synapse groups between very large neuron groups.
+     * @return a 2D array with a number of rows equal to the total number of
+     * synapses and a number of columns equal to 3. Each row contains the
+     * the source index number, the target index number, and the strength in
+     * that order. This array is then sorted by source index then target index.
+     * Ex:  
+     *      1   2   .9
+     *      0   3   5.3
+     *      0   1   -.1
+     * Becomes:
+     *      0   1   -.1
+     *      0   3   5.3
+     *      1   2   .9
+     */
+    public <T> T [][] getMatrixOfValues(SynapseParameterGetter<T> getter,
+            T[][] valMat) {
+        int i = 0;
+        int j = 0;
+        // Create numbers for neurons... less expensive than constant
+        // indexOf calls to array lists.
+        Map<Neuron, Integer> sourceMap = new HashMap<Neuron, Integer>(
+                (int) (sourceNeuronGroup.size() / 0.75));
+        Map<Neuron, Integer> targetMap = new HashMap<Neuron, Integer>(
+                (int) (targetNeuronGroup.size() / 0.75));
+        // Assign indices to each source and target neuron in a lookup table
+        // so that synapses can be identified by a source and target index
+        for (Neuron n : getSourceNeurons()) {
+            sourceMap.put(n, i++);
+        }
+        for (Neuron n : getTargetNeurons()) {
+            targetMap.put(n, j++);
+        }
+        for (Synapse s : getAllSynapses()) {
+                valMat[sourceMap.get(s.getSource())]
+                        [targetMap.get(s.getTarget())]
+                                = getter.getParameterFromSynapse(s);
+        }
+        return valMat;
     }
 
     /**
@@ -1146,7 +1189,7 @@ public class SynapseGroup extends Group {
      * Uses the default name which is: label + date & time
      */
     public void saveToFileAsLinkedList() {
-        saveToFileAsLinkedList(getLabel() + "_" + Utils.getTimeString());
+        saveToFileAsLinkedList(getLabel()); //+ "_" + Utils.getTimeString());
     }
     
     /**

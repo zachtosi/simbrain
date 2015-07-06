@@ -23,10 +23,8 @@ import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
 import javax.swing.JMenuItem;
 
-import org.simbrain.network.groups.Group;
 import org.simbrain.network.gui.NetworkPanel;
 import org.simbrain.network.gui.nodes.NeuronGroupNode;
-import org.simbrain.network.listeners.GroupAdapter;
 import org.simbrain.network.subnetworks.SOMGroup;
 import org.simbrain.util.Utils;
 
