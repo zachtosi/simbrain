@@ -1,0 +1,29 @@
+Network Parameters
+RES Neurons: 540
+Input Neurons: 4
+Time-step: 0.5
+Inhib %: 0.2
+IP On: true
+
+Synapse Parameters
+II_STDP Hebbian: true
+IE_STDP Hebbian: true
+E-STDP Learning Rate: 5.0E-5
+I-STDP Learning Rate: 5.0E-5
+II_W_PLUS: 4.8
+II_W_MINUS: 1.0
+IE_W_PLUS: 5.4
+IE_W_MINUS: 1.0
+E_W_PLUS: 4.8
+E_W_MINUS: 1.0
+Start wt val:0.01
+
+Neuron Parameters
+Alpha: 1.0
+StartIP Const.: 1.0E7
+Start Learning Rate: 0.1
+Beta: 60.0
+Small FR Threshold: 5.0
+Tau_a: 1000.0
+
+

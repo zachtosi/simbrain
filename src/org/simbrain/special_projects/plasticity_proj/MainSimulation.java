@@ -50,7 +50,7 @@ public class MainSimulation {
     private static int NUM_NEURONS = 540;
     private static int GRID_SPACE = 100; // influences delay times
     private static int NUM_INPUTS = 4;
-    private static String IN_FILE_NAME = "./inputs/Generalization_Test_Inputs"
+    private static String IN_FILE_NAME = "./ZSim_Inputs/Generalization_Test_Inputs"
             + "_4ch_20Hz_200ms_05ms_bins1.csv";
     private static String TH_FILE_NAME = "LAIP_"
             + LocalDateTime.now().toString() + "_Thresholds.mat";
@@ -103,7 +103,7 @@ public class MainSimulation {
     private static final double IE_TAU_PLUS = 20;
     private static final double IE_TAU_MINUS = 50;
     private static final double E_TAU_PLUS = 20;
-    private static final double E_TAU_MINUS = 50;
+    private static final double E_TAU_MINUS = 100;
 
     /*
      * Values that all synapses take on at the very begining. This should be low
@@ -236,19 +236,8 @@ public class MainSimulation {
             for (int i = 0, n = TEST_RUNS * TEST_DATA.length; i < n; i++) {
                 c = i;
 
-                if (i % TEST_DATA.length == 0) {
-                    // Create a new file for spike times
-                    LAIP_RES.stopRecording();
-                    LAIP_RES.startRecording(new File(
-                            ((double) i / REC_INTERVAL)
-                                    + "-"
-                                    + ((double) (i + TEST_DATA.length) / REC_INTERVAL)
-                                    + "s.csv"));
-                }
-
                 // Every "REC_INTERVAL" usually 1s, record some data
                 if (i % REC_INTERVAL == 0) {
-                    System.out.println(i / REC_INTERVAL);
                     List<Neuron> neurons = LAIP_RES.getNeuronList();
                     for (int j = 0; j < NUM_NEURONS; j++) {
                         TH_VALS[i / REC_INTERVAL][j] = ((IPIFRule)
@@ -256,6 +245,16 @@ public class MainSimulation {
                         PF_VALS[i / REC_INTERVAL][j] = ((IPIFRule)
                                 neurons.get(j).getUpdateRule()).getPrefFR();
                     }
+                }
+                
+                if (i % TEST_DATA.length == 0) {
+                    // Create a new file for spike times
+                    LAIP_RES.stopRecording();
+                    LAIP_RES.startRecording(new File(
+                            ((double) i / REC_INTERVAL)
+                                    + "-"
+                                    + ((double) (i + TEST_DATA.length)
+                                            / REC_INTERVAL) + "s.csv"));
                 }
 
                 // Turn off STDP & IP for last test run
@@ -271,6 +270,11 @@ public class MainSimulation {
                 // Update the network
                 synchronized (NETWORK) {
                     NETWORK.update();
+                }
+                
+                // Print out which simulated second we're on
+                if (i % REC_INTERVAL == 0) {
+                    System.out.println(i / REC_INTERVAL);
                 }
 
             }
