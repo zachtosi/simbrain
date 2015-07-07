@@ -5,6 +5,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import org.simbrain.network.core.SpikingNeuronUpdateRule;
 import org.simbrain.network.core.Synapse;
 import org.simbrain.network.synapse_update_rules.STDPRule;
+import org.simbrain.util.SimbrainConstants.Polarity;
 
 public class SymmetricSTDPRule extends STDPRule{
     /** Time constant for LTP. */
@@ -44,57 +45,10 @@ public class SymmetricSTDPRule extends STDPRule{
         duplicateSynapse.setW_plus(this.getW_plus());
         duplicateSynapse.setLearningRate(this.getLearningRate());
         duplicateSynapse.setHebbian(hebbian);
-        duplicateSynapse.setDampen(dampen);
-        duplicateSynapse.setDampeningFactor(dampeningFactor);
-        duplicateSynapse.setNoisy(noisy);
         return duplicateSynapse;
     }
     
-//    public enum WindowType {
-//        HEBBIAN {
-//            @Override
-//            public double wtChange(double originalWtChange,
-//                    boolean excite) {
-//                
-//                return 0;
-//            }
-//        },
-//        ANTI_HEBBIAN {
-//            @Override
-//            public double wtChange(double originalWtChange,
-//                    boolean excite) {
-//                // TODO Auto-generated method stub
-//                return 0;
-//            }
-//        },
-//        SYMMETRIC{
-//            @Override
-//            public double wtChange(double originalWtChange,
-//                    boolean excite) {
-//                return Math.abs(originalWtChange);
-//            }
-//        };
-//        public abstract double wtChange(double originalWtChange,
-//                boolean excite);
-    // }
-
     private boolean hebbian = true;
-
-    private boolean dampen = false;
-
-    private double dampeningFactor = 0.1;
-
-    private boolean noisy = true;
-
-    private double noiseStd = 0.07;
-
-    public void setNoisy(boolean noisy) {
-        this.noisy = noisy;
-    }
-
-    public boolean isNoisy() {
-        return noisy;
-    }
 
     private double delta_w = 0;
     
@@ -127,19 +81,16 @@ public class SymmetricSTDPRule extends STDPRule{
             delta_w = -wm * Math.exp(-delta_t / tm)
                     * learningRate; 
         }
-        if (noisy) {
-            delta_w *= (1 + (ThreadLocalRandom.current()
-                    .nextGaussian() * noiseStd));
-        }
-        if (dampen && synapse.getSource().isSpike()) {
-            delta_w -= dampeningFactor;
-        }
         // Subtracts deltaW if inhibitory adds otherwise
         int sign = (int) Math.signum(str);
         if (sign != 0) {
             synapse.setStrength(str + (sign * delta_w));
         } else {
-            synapse.setStrength(str + Math.abs(delta_w));
+            if (synapse.getSource().getPolarity() == Polarity.EXCITATORY) {
+                synapse.setStrength(str + delta_w);
+            } else {
+                synapse.setStrength(str - delta_w);
+            }
         }
     }
 
@@ -223,27 +174,6 @@ public class SymmetricSTDPRule extends STDPRule{
     }
 
     public void setHebbian(boolean hebbian) {
-//        if (this.hebbian != hebbian) {
-//            double holder = W_plus;
-//            W_plus = W_minus;
-//            W_minus = holder;
-//        }
         this.hebbian = hebbian;
-    }
-
-    public boolean isDampen() {
-        return dampen;
-    }
-
-    public void setDampen(boolean dampen) {
-        this.dampen = dampen;
-    }
-
-    public double getDampeningFactor() {
-        return dampeningFactor;
-    }
-
-    public void setDampeningFactor(double dampeningFactor) {
-        this.dampeningFactor = dampeningFactor;
     }
 }

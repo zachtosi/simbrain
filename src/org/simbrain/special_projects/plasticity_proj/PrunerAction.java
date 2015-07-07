@@ -73,7 +73,6 @@ public class PrunerAction implements NetworkUpdateAction {
                     }
                 }
             }
-            System.gc();
             System.out.print("\t" + synGrp.size() + " ");
             System.out.println((double) synGrp.size() / (synGrp
                     .getSourceNeuronGroup().size() * (synGrp

@@ -10,6 +10,7 @@ import java.io.PrintWriter;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 import java.util.Scanner;
@@ -31,7 +32,6 @@ import org.simbrain.network.core.Synapse;
 import org.simbrain.network.groups.NeuronGroup;
 import org.simbrain.network.groups.SynapseGroup;
 import org.simbrain.network.neuron_update_rules.SpikingThresholdRule;
-import org.simbrain.network.synapse_update_rules.STDPRule;
 import org.simbrain.network.synapse_update_rules.StaticSynapseRule;
 import org.simbrain.network.synapse_update_rules.spikeresponders.ConvolvedJumpAndDecay;
 import org.simbrain.network.synapse_update_rules.spikeresponders.UDF;
@@ -46,15 +46,15 @@ import com.jmatio.types.MLDouble;
 
 public class MainSimulation {
     /*
-     * _______________________________________________________________________ |
+     * _______________________________________________________________________|
      * General Sim parameters |
      * _______________________________________________________________________|
      */
-    private static int NUM_NEURONS = 540;
+    private static int NUM_NEURONS = 1000;
     private static int GRID_SPACE = 100; // influences delay times
-    private static int NUM_INPUTS = 4;
-    private static String IN_FILE_NAME = "./ZSim_Inputs/Generalization_Test_Inputs"
-            + "_4ch_20Hz_200ms_05ms_bins1.csv";
+    private static int NUM_INPUTS = 100;
+    private static String IN_FILE_NAME = "./ZSim_Inputs/Generalization_Test"
+            + "_Inputs_100ch_20Hz_200ms_05ms_bins1.csv";
     private static String TH_FILE_NAME = "LAIP_"
             + LocalDateTime.now().toString() + "_Thresholds.mat";
     private static String PF_FILE_NAME = "LAIP_"
@@ -68,7 +68,7 @@ public class MainSimulation {
     private static int TEST_RUNS = 40;
 
     /*
-     * _______________________________________________________________________ |
+     * _______________________________________________________________________|
      * Network parameters |
      * _______________________________________________________________________|
      */
@@ -85,14 +85,13 @@ public class MainSimulation {
     private static final double INHIB_RATIO = 0.2; // 20%
 
     /*
-     * _______________________________________________________________________ |
+     * _______________________________________________________________________|
      * Synapse and synaptic plasticity parameters |
      * _______________________________________________________________________|
      */
     private static SynapseGroup LAIP_RES_SYNS;
     private static final boolean II_STDP_HEB = true;
     private static final boolean IE_STDP_HEB = true;
-    private static final boolean USE_ADAPTIVE_SYMMETRY = true;
     private static final double I_LR = 0.00005;
     private static final double E_LR = 0.00005;
     private static final double II_W_PLUS = 4.8;
@@ -132,7 +131,8 @@ public class MainSimulation {
     // 1 meaning all possible connections exist from the input neurons to the
     // output neurons, and 0 meaning that no synapses will be constructed
     // between the input and the output.
-    private static double IN_DENSITY = 1; // 0.05 when using > 4 inputs
+    private static double IN_DENSITY = 0.1; // make this closer to 1 for less
+    //inputs and closer to 0 for less inputs/more res neurons
 
     /*
      * _______________________________________________________________________ |
@@ -146,7 +146,8 @@ public class MainSimulation {
     private static final double INHIB_REF = 2.0; // ms
     private static final double EXCITE_REF = 3.0; // ms
     private static final double I_BG = 13.5; // nA
-    private static final double RESET_POTENTIAL = 13.5; // mV, use 10 for larger sims
+    private static final double RESET_POTENTIAL = 13; // mV, use 10 for larger
+                                                        // sims
 
     /*
      * Homeostatic and Intrinsic plasticity (IP) parameters
@@ -255,7 +256,7 @@ public class MainSimulation {
                                 neurons.get(j).getUpdateRule()).getPrefFR();
                     }
                 }
-                
+
                 if (i % TEST_DATA.length == 0) {
                     // Create a new file for spike times
                     LAIP_RES.stopRecording();
@@ -263,7 +264,7 @@ public class MainSimulation {
                             ((double) i / REC_INTERVAL)
                                     + "-"
                                     + ((double) (i + TEST_DATA.length)
-                                            / REC_INTERVAL) + "s.csv"));
+                                    / REC_INTERVAL) + "s.csv"));
                 }
 
                 // Turn off STDP & IP for last test run
@@ -280,7 +281,7 @@ public class MainSimulation {
                 synchronized (NETWORK) {
                     NETWORK.update();
                 }
-                
+
                 // Print out which simulated second we're on
                 if (i % REC_INTERVAL == 0) {
                     System.out.println(i / REC_INTERVAL);
@@ -504,7 +505,7 @@ public class MainSimulation {
         for (Synapse s : LAIP_RES_SYNS.getAllSynapses()) {
             double dist = Network
                     .getEuclideanDist(s.getSource(), s.getTarget());
-            double delay = Math.round(dist / (0.6 * NUM_NEURONS));
+            double delay = Math.round(dist / (0.4 * NUM_NEURONS));
 
             s.setDelay((int) delay);
             if (Math.random() < 0.01) {
@@ -512,11 +513,10 @@ public class MainSimulation {
             }
         }
 
-        STDPRule dummy = new STDPRule();
+        SymmetricSTDPRule dummy = new SymmetricSTDPRule();
         LAIP_RES_SYNS.setLearningRule(dummy, Polarity.INHIBITORY);
 
-        STDPRule iiSTDP = USE_ADAPTIVE_SYMMETRY ? new SymmetricSTDPRule()
-                : new STDPRule();
+        SymmetricSTDPRule iiSTDP = new SymmetricSTDPRule();
         iiSTDP.setLearningRate(I_LR);
         iiSTDP.setTau_minus(II_TAU_MINUS);
         iiSTDP.setTau_plus(II_TAU_PLUS);
@@ -524,8 +524,7 @@ public class MainSimulation {
         iiSTDP.setW_minus(II_W_MINUS);
         iiSTDP.setHebbian(II_STDP_HEB);
 
-        STDPRule ieSTDP = USE_ADAPTIVE_SYMMETRY ? new SymmetricSTDPRule()
-                : new STDPRule();
+        SymmetricSTDPRule ieSTDP = new SymmetricSTDPRule();
         ieSTDP.setLearningRate(I_LR);
         ieSTDP.setTau_minus(IE_TAU_MINUS);
         ieSTDP.setTau_plus(IE_TAU_PLUS);
@@ -544,8 +543,7 @@ public class MainSimulation {
             }
         }
 
-        STDPRule eeSTDP = USE_ADAPTIVE_SYMMETRY ? new SymmetricSTDPRule()
-                : new STDPRule();
+        SymmetricSTDPRule eeSTDP = new SymmetricSTDPRule();
         eeSTDP.setLearningRate(E_LR);
         eeSTDP.setTau_minus(E_TAU_MINUS);
         eeSTDP.setTau_plus(E_TAU_PLUS);
@@ -563,7 +561,7 @@ public class MainSimulation {
         INPUT_LAYER.setInputMode(true);
         NETWORK.addGroup(INPUT_LAYER);
         ConnectNeurons sCon;
-        if (IN_DENSITY < 1) {
+        if (IN_DENSITY < 1.0) {
             sCon = new Sparse(IN_DENSITY, true, false);
         } else {
             sCon = new AllToAll(false);
@@ -613,8 +611,9 @@ public class MainSimulation {
         neuron.setZ(randi.nextInt((int) (Math.sqrt(NUM_NEURONS)
                 * GRID_SPACE)));
     }
-    
-    private static void rewireSynapseGroup(SynapseGroup synGrp, int iter) {
+
+    public static void rewireSynapseGroup(SynapseGroup synGrp, int iter) {
+        
         List<Neuron> targetNeurons = new ArrayList<Neuron>(synGrp
                 .getTargetNeurons());
         List<Neuron> sourceNeurons = new ArrayList<Neuron>(synGrp
@@ -622,32 +621,48 @@ public class MainSimulation {
         Collections.shuffle(sourceNeurons);
         ThreadLocalRandom tlr = ThreadLocalRandom.current();
         for (int k = 0; k < iter; k++) {
+            Collections.shuffle(sourceNeurons);
             for (int i = 0; i < sourceNeurons.size() - 1; i++) {
+                int initSize = synGrp.size();
                 Neuron n1 = sourceNeurons.get(i);
                 Neuron n2 = sourceNeurons.get(i + 1);
 
-                List<Neuron> n1Targets = new ArrayList<Neuron>(n1.getFanOut()
+                Set<Neuron> n1Targets = new HashSet<Neuron>(n1.getFanOut()
                         .keySet());
                 n1Targets.retainAll(targetNeurons);
-                List<Neuron> n2Targets = new ArrayList<Neuron>(n2.getFanOut()
+                n1Targets.remove(n2);
+                Set<Neuron> n2Targets = new HashSet<Neuron>(n2.getFanOut()
                         .keySet());
                 n2Targets.retainAll(targetNeurons);
+                n2Targets.remove(n1);
+                
+                n2Targets.removeAll(n1.getFanOut().keySet());
+                n1Targets.removeAll(n2.getFanOut().keySet());
+                
+                if (n1Targets.isEmpty() || n2Targets.isEmpty()) {
+                    continue;
+                }
 
-                Neuron n3 = n1Targets.get(tlr.nextInt(n1Targets.size()));
-                Synapse toRemove1 = n1.getFanOut().get(n3);
-                Neuron n4 = n2Targets.get(tlr.nextInt(n2Targets.size()));
+                Neuron n3 = (Neuron) n1Targets.toArray()
+                        [tlr.nextInt(n1Targets.size())];
+                Neuron n4 = (Neuron) n2Targets.toArray()
+                        [tlr.nextInt(n2Targets.size())];
+
+                if (n3 == n4) {
+                    continue;
+                }
                 Synapse toRemove2 = n2.getFanOut().get(n4);
-
+                Synapse toRemove1 = n1.getFanOut().get(n3);
+                
+                synGrp.getParentNetwork().removeSynapse(toRemove1);
+                synGrp.getParentNetwork().removeSynapse(toRemove2);
                 Synapse s1 = Synapse.copySynapseWithNewSrcTarg(toRemove1, n1,
                         n4);
                 Synapse s2 = Synapse.copySynapseWithNewSrcTarg(toRemove2, n2,
                         n3);
-
-                NETWORK.removeSynapse(toRemove1);
-                NETWORK.removeSynapse(toRemove2);
-
                 synGrp.addSynapseUnsafe(s1);
                 synGrp.addSynapseUnsafe(s2);
+
             }
         }
     }

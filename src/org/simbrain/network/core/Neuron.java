@@ -1206,5 +1206,17 @@ public class Neuron {
     public void setSpkBuffer(boolean spkBuffer) {
         this.spkBuffer = spkBuffer;
     }
+    
+    public int getInDegree() {
+        return fanIn.size();
+    }
+    
+    public int getOutDegree() {
+        return fanOut.size();
+    }
 
+    public int getDegree() {
+        return fanIn.size() + fanOut.size();
+    }
+    
 }
