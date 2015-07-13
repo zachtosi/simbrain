@@ -277,19 +277,19 @@ public class MainSimulation {
                                     / REC_INTERVAL) + "s.csv"));
                 }
 
-                if (i == 16 * TEST_DATA.length) {
+                if (i == 15 * TEST_DATA.length) {
                     NETWORK.getUpdateManager().removeAction(PRUNER);
                 }
                 
                 // Turn off STDP & IP for last test runs
-                if (i == (TEST_RUNS - 2) * TEST_DATA.length) {
+                if (i == (TEST_RUNS - 3) * TEST_DATA.length) {
                     LAIP_RES_SYNS.setLearningRule(new StaticSynapseRule(),
                             Polarity.BOTH);
                     printNetworkStats();
                 }
                 
                 // Re-wire the synapse group for the last run.
-                if (i == (TEST_RUNS - 1) * TEST_DATA.length) {
+                if (i == (TEST_RUNS - 2) * TEST_DATA.length) {
                     rewireSynapseGroup(LAIP_RES_SYNS, 100);
                     printNetworkStats();
                 }
