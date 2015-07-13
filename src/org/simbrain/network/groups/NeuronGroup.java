@@ -325,6 +325,7 @@ public class NeuronGroup extends Group implements CopyableGroup<NeuronGroup> {
         }
         if (isSpikingNeuronGroup()) {
             setInputValues(testData[inputIndex]);
+//            Network.updateNeurons(neuronList);
         } else {
             forceSetActivations(testData[inputIndex]);
         }

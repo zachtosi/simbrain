@@ -4,6 +4,7 @@ import java.util.Arrays;
 
 import org.simbrain.network.connections.Sparse;
 import org.simbrain.network.core.Network;
+import org.simbrain.network.core.Synapse;
 import org.simbrain.network.groups.NeuronGroup;
 import org.simbrain.network.groups.SynapseGroup;
 import org.simbrain.util.SimbrainConstants.Polarity;
@@ -17,7 +18,7 @@ public class TestingSynapseGroupRewire {
         
         Network net = new Network(); // Create the network
         // Create a neuron group with 1000 neurons
-        NeuronGroup ng = new NeuronGroup(net, 100);
+        NeuronGroup ng = new NeuronGroup(net, 1000);
         // Create a sparse connector which specifies a synapse density of 0.1
         // i.e. of all possible synaptic connections create only 1/10 of them
         Sparse sp = new Sparse(0.1, false, false);
@@ -45,9 +46,13 @@ public class TestingSynapseGroupRewire {
         double [] inWts = synGrp.getInhibitoryStrengths();
         int [] inDegs = new int[ng.size()];
         int [] outDegs = new int[ng.size()];
+        double [] sumOut = new double[ng.size()];
         for (int i = 0, n = ng.size(); i < n; i++) {
             inDegs[i] = ng.getNeuronList().get(i).getInDegree();
             outDegs[i] = ng.getNeuronList().get(i).getOutDegree();
+            for (Synapse s : ng.getNeuronList().get(i).getFanOut().values()) {
+                sumOut[i] += s.getStrength();
+            }
         }
         
         System.out.println("Begin Rewiring...:");
@@ -65,9 +70,13 @@ public class TestingSynapseGroupRewire {
         double [] inWtsRw = synGrp.getInhibitoryStrengths();
         int [] inDegsRw = new int[ng.size()];
         int [] outDegsRw = new int[ng.size()];
+        double [] sumOutRw = new double[ng.size()];
         for (int i = 0, n = ng.size(); i < n; i++) {
             inDegsRw[i] = ng.getNeuronList().get(i).getInDegree();
             outDegsRw[i] = ng.getNeuronList().get(i).getOutDegree();
+            for (Synapse s : ng.getNeuronList().get(i).getFanOut().values()) {
+                sumOutRw[i] += s.getStrength();
+            }
         }
         
         // Sort all arrays making them directly comparable.
@@ -75,12 +84,13 @@ public class TestingSynapseGroupRewire {
         Arrays.sort(inWts);
         Arrays.sort(inDegs);
         Arrays.sort(outDegs);
+        Arrays.sort(sumOut);
         Arrays.sort(exWtsRw);
         Arrays.sort(inWtsRw);
         Arrays.sort(inDegsRw);
         Arrays.sort(outDegsRw);
-
-
+        Arrays.sort(sumOutRw);
+        
         System.out.println("Testing that no synapses were lost...");
         if (trueSparsity == trueSparsityRw) {
             System.out.println("PASSED!");
@@ -94,6 +104,7 @@ public class TestingSynapseGroupRewire {
         boolean inWtsPassed = true;
         boolean inDegsPassed = true;
         boolean outDegsPassed = true;
+        boolean sumOutsPassed = true;
         
         for (int i = 0, n = ng.size(); i < n; i++) {
             if (exWtsPassed) {
@@ -107,6 +118,9 @@ public class TestingSynapseGroupRewire {
             }
             if (outDegsPassed) {
                 outDegsPassed = outDegs[i] == outDegsRw[i];
+            }
+            if (sumOutsPassed) {
+                sumOutsPassed = Math.abs(sumOut[i] - sumOutRw[i]) < 1E-9;
             }
         }
         System.out.print("Excitatory strengths: ");
@@ -140,6 +154,14 @@ public class TestingSynapseGroupRewire {
             System.out.println("FAILED!");
             System.out.println(Arrays.toString(outDegs));
             System.out.println(Arrays.toString(outDegsRw));
+        }
+        System.out.print("Outgoing Sum: ");
+        if (sumOutsPassed) {
+            System.out.println("PASSED!");
+        } else {
+            System.out.println("FAILED!");
+            System.out.println(Arrays.toString(sumOut));
+            System.out.println(Arrays.toString(sumOutRw));
         }
     }
     

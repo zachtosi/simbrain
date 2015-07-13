@@ -10,11 +10,11 @@ public class PrunerAction implements NetworkUpdateAction {
 
     private final SynapseGroup synGrp;
     
-    private double pruneInterval = 5000; // 5s
+    private double pruneInterval = 10000; // 10s
     
-    private double pruneThresholdEx = 0.005;
+    private double pruneThresholdEx = 0.05;
     
-    private double pruneThresholdIn = 0.01;
+    private double pruneThresholdIn = 0.05;
     
     public PrunerAction(SynapseGroup synGrp) {
         this.synGrp = synGrp;

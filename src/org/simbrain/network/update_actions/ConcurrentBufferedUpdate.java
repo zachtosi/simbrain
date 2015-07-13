@@ -188,6 +188,7 @@ public class ConcurrentBufferedUpdate implements NetworkUpdateAction,
         for (NeuronGroup ng : network.getFlatNeuronGroupList()) {
             network.fireGroupChanged(ng, "Check In");
         }
+        System.out.println("Num neurons in task set: " + cbu.taskSet.size());
         cbu.collectorThread.start();
         return cbu;
     }
@@ -391,6 +392,10 @@ public class ConcurrentBufferedUpdate implements NetworkUpdateAction,
         }
     }
 
+    public List<NeuronGroup> getInputGroups() {
+        return new ArrayList<NeuronGroup>(inputGroups);
+    }
+    
     private int getAvailableConsumerProcessors() {
         return Runtime.getRuntime().availableProcessors();
     }
@@ -416,7 +421,7 @@ public class ConcurrentBufferedUpdate implements NetworkUpdateAction,
 
         // TODO: Make this dependent on the number of neurons to be update and
         // the number of available processor cores.
-        private static final int DEFAULT_TASK_PARTITION_RATIO = 256;
+        private static final int DEFAULT_TASK_PARTITION_RATIO = 128;
 
         private AtomicInteger indexPtr;
 
@@ -476,6 +481,14 @@ public class ConcurrentBufferedUpdate implements NetworkUpdateAction,
             }
         }
 
+        public int size() {
+            int size = 0;
+            for (BufferedUpdateTask but : taskArray) {
+                size += but.getHosts().length;
+            }
+            return size;
+        }
+        
         public void reset() {
             synchronized (indexPtr) {
                 indexPtr.set(0);
@@ -492,7 +505,7 @@ public class ConcurrentBufferedUpdate implements NetworkUpdateAction,
      * @param args
      */
     public static void main(String[] args) {
-        final int numNeurons = 5000;
+        final int numNeurons = 100;
         System.out.println(System.getProperty("java.vm.name"));
         Scanner keyboard = new Scanner(System.in);
         System.out.println("Press any key, then ENTER.");
@@ -528,13 +541,13 @@ public class ConcurrentBufferedUpdate implements NetworkUpdateAction,
                 Polarity.EXCITATORY, ProbDistribution.LOGNORMAL);
         PolarizedRandomizer inRand = new PolarizedRandomizer(
                 Polarity.INHIBITORY, ProbDistribution.LOGNORMAL);
-        exRand.setParam1(0.025);
-        exRand.setParam2(0.0125);
-        inRand.setParam1(0.075);
-        inRand.setParam2(0.03);
+        exRand.setParam1(1.5);
+        exRand.setParam2(0.75);
+        inRand.setParam1(0.2);
+        inRand.setParam2(0.1);
         System.out.println("Begin Network Construction...");
         SynapseGroup sg = SynapseGroup.createSynapseGroup(ng, ng,
-                new Sparse(0.01, false, false),
+                new Sparse(0.1, false, false),
                 0.8, exRand, inRand);
         for (Synapse s : sg.getAllSynapses()) {
             s.setId(null);
@@ -561,54 +574,73 @@ public class ConcurrentBufferedUpdate implements NetworkUpdateAction,
         if (!(cont.matches("Y") || cont.matches("y"))) {
             return;
         }
-        // // final int TEST_ITERATIONS = 500;
         net.getUpdateManager().clear();
         ConcurrentBufferedUpdate cbu = ConcurrentBufferedUpdate
                 .createConcurrentBufferedUpdate(net);
         net.getUpdateManager().addAction(cbu);
-        System.out.println(cbu.currentAvailableProcessors);
-        // Quick tune up...
-        for (int i = 0; i < 10000; i++) {
-            if (i % 100 == 0) {
-                System.out.println(i + "...");
-            }
+        int siz = 0;
+        for (BufferedUpdateTask but : cbu.taskSet.taskArray) {
+            siz += but.getHosts().length;
+        }
+        System.out.println(siz);
+        System.out.println();
+        for (int i = 0; i < 500; i++) {
             net.update();
         }
-        // System.out.println("End tune-up");
-        // for (NetworkUpdateAction nua :
-        // net.getUpdateManager().getActionList()) {
-        // if (nua instanceof ConcurrentBufferedUpdate) {
-        // ((ConcurrentBufferedUpdate) nua).shutdown();
-        // }
-        // }
-
-        // SerialExecution
-        // ng.startRecording();
-        // start = System.nanoTime();
-        // net.getUpdateManager().clear();
-        // net.getUpdateManager().addAction(new UpdateGroup(sg));
-        // net.getUpdateManager().addAction(new UpdateGroup(ng));
-        // net.getUpdateManager().addAction(new NeuronGroupRecorder(ng));
-        // for (int i = 0; i < TEST_ITERATIONS; i++) {
-        // net.update();
-        // }
-        // ng.stopRecording();
-        // end = System.nanoTime();
-        // System.out.println("Serial: "
-        // + SimbrainMath.roundDouble((end - start) / Math.pow(10, 9), 6));
-
-        // net.getUpdateManager().clear();
-        // net.getUpdateManager().addAction(new ConcurrentBufferedUpdate(net));
-        // net.getUpdateManager().addAction(new NeuronGroupRecorder(ng));
-        // ng.startRecording();
-        start = System.nanoTime();
-        for (int i = 0; i < 2000; i++) {
-            net.update();
-        }
-        // ng.stopRecording();
-        end = System.nanoTime();
-        System.out.println("Parallel: "
-                + SimbrainMath.roundDouble((end - start) / Math.pow(10, 9), 6));
+//        
+//        for (Neuron n : ng.getNeuronList()) {
+//            System.out.print(((IzhikevichRule) n.getUpdateRule()).upCount.intValue() + "\t");
+//            System.out.print(((IzhikevichRule) n.getUpdateRule()).spkCount.intValue() + "\t");
+//            System.out.println(((IzhikevichRule) n.getUpdateRule()).getSpikeCount());
+//        }
+//        // // final int TEST_ITERATIONS = 500;
+//        net.getUpdateManager().clear();
+//        ConcurrentBufferedUpdate cbu = ConcurrentBufferedUpdate
+//                .createConcurrentBufferedUpdate(net);
+//        net.getUpdateManager().addAction(cbu);
+//        System.out.println(cbu.currentAvailableProcessors);
+//        // Quick tune up...
+//        for (int i = 0; i < 10000; i++) {
+//            if (i % 100 == 0) {
+//                System.out.println(i + "...");
+//            }
+//            net.update();
+//        }
+//        // System.out.println("End tune-up");
+//        // for (NetworkUpdateAction nua :
+//        // net.getUpdateManager().getActionList()) {
+//        // if (nua instanceof ConcurrentBufferedUpdate) {
+//        // ((ConcurrentBufferedUpdate) nua).shutdown();
+//        // }
+//        // }
+//
+//        // SerialExecution
+//        // ng.startRecording();
+//        // start = System.nanoTime();
+//        // net.getUpdateManager().clear();
+//        // net.getUpdateManager().addAction(new UpdateGroup(sg));
+//        // net.getUpdateManager().addAction(new UpdateGroup(ng));
+//        // net.getUpdateManager().addAction(new NeuronGroupRecorder(ng));
+//        // for (int i = 0; i < TEST_ITERATIONS; i++) {
+//        // net.update();
+//        // }
+//        // ng.stopRecording();
+//        // end = System.nanoTime();
+//        // System.out.println("Serial: "
+//        // + SimbrainMath.roundDouble((end - start) / Math.pow(10, 9), 6));
+//
+//        // net.getUpdateManager().clear();
+//        // net.getUpdateManager().addAction(new ConcurrentBufferedUpdate(net));
+//        // net.getUpdateManager().addAction(new NeuronGroupRecorder(ng));
+//        // ng.startRecording();
+//        start = System.nanoTime();
+//        for (int i = 0; i < 2000; i++) {
+//            net.update();
+//        }
+//        // ng.stopRecording();
+//        end = System.nanoTime();
+//        System.out.println("Parallel: "
+//                + SimbrainMath.roundDouble((end - start) / Math.pow(10, 9), 6));
         System.exit(0);
         return;
     }

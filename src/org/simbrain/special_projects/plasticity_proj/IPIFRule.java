@@ -4,6 +4,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import org.simbrain.network.core.Neuron;
 import org.simbrain.network.core.SpikingNeuronUpdateRule;
+import org.simbrain.network.core.Synapse;
 import org.simbrain.network.neuron_update_rules.interfaces.NoisyUpdateRule;
 import org.simbrain.util.math.ProbDistribution;
 import org.simbrain.util.randomizer.Randomizer;
@@ -169,6 +170,8 @@ public class IPIFRule extends SpikingNeuronUpdateRule implements
         neuron.setBuffer(memPotential);
     }
 
+    private double dPi = 0;
+    
     /**
      * Performs the neuronal plasticity changes that affect the preferred firing
      * rate and threshold.
@@ -176,12 +179,13 @@ public class IPIFRule extends SpikingNeuronUpdateRule implements
      * @param neuron
      * @param timeStep
      */
-    private void performPlasticityChanges(Neuron neuron, double timeStep) {
+    private void performPlasticityChanges(final Neuron neuron,
+            final double timeStep) {
 
         // The neuron estimates its firing rate by a decaying amount of
         // arbitrary "resource", which decays faster if the neuron preferrs to
         // fire more frequently.
-        tauA = 10000 / (prefFR + 1);
+//        tauA = 10000 / (prefFR + 1);
         adapt += -timeStep * adapt / tauA;
         // final firing rate estimate
         estFR += timeStep * ((adapt / tauA) - estFR);
@@ -197,6 +201,33 @@ public class IPIFRule extends SpikingNeuronUpdateRule implements
 
         if (usingIP && neuron.getNetwork().getTime() > 1000) {
 
+            // Synaptic normalization procedure. Ensures that the sum of
+            // incoming synaptic connections cannot exceed a certain value.
+            // Leaves synapses undisturbed if their sum is below this value
+            // and normalizes them to this value otherwise.
+            double inSum = 0;
+            double outSum = 0;
+            for (int i = 0, n = neuron.getFanIn().size(); i < n; i++) {
+                inSum += Math.abs(neuron.getFanIn().get(i).getStrength());
+            }
+            for (Synapse s : neuron.getFanOut().values()) {
+                outSum += Math.abs(s.getStrength());
+            }
+            double saturationVal = 400 * Math.exp(0.05 * prefFR) + 1000;
+            if (inSum > saturationVal) {
+                for (int i = 0, n = neuron.getFanIn().size(); i < n; i++) {
+                    double str = neuron.getFanIn().get(i).getStrength();
+                    neuron.getFanIn().get(i).forceSetStrength(saturationVal
+                            * str / inSum);
+                }
+            }
+            if (outSum > saturationVal) {
+                for (Synapse s : neuron.getFanOut().values()) {
+                    s.forceSetStrength(saturationVal * s.getStrength()
+                            / outSum);
+                }
+            }
+            
             // Annealing procedure. ipConst (homeostatic plasticity) and
             // learningRate (intrinsic plasticity) change over time such that
             // initially neurons can easily change their preferred firing rate
@@ -209,23 +240,6 @@ public class IPIFRule extends SpikingNeuronUpdateRule implements
             learningRate -= timeStep * intrinsicCooling * (learningRate
                     - learningRateFinal);
 
-            // Synaptic normalization procedure. Ensures that the sum of
-            // incoming synaptic connections cannot exceed a certain value.
-            // Leaves synapses undisturbed if their sum is below this value
-            // and normalizes them to this value otherwise.
-            double sum = 0;
-            for (int i = 0, n = neuron.getFanIn().size(); i < n; i++) {
-                sum += Math.abs(neuron.getFanIn().get(i).getStrength());
-            }
-            double saturationVal = 400 * Math.exp(0.05 * prefFR) + 1000;
-            if (sum > saturationVal) {
-                for (int i = 0, n = neuron.getFanIn().size(); i < n; i++) {
-                    double str = neuron.getFanIn().get(i).getStrength();
-                    neuron.getFanIn().get(i).forceSetStrength(saturationVal
-                            * str / sum);
-                }
-            }
-
             // Alter threshold to maintain firing rate
             // homeostasis at preferred firing rate
             threshold += timeStep * threshold
@@ -233,23 +247,25 @@ public class IPIFRule extends SpikingNeuronUpdateRule implements
 
             // Adjust the preferred firing rate so as to bring it closer to
             // the preferred firing rate
-            double noise = ProbDistribution.NORMAL.nextRand(0, 0.1);
+            double noise = ProbDistribution.NORMAL.nextRand(0, 0.05);
             if (estFRScale > prefFR) {
-                double dPi = 0;
-                dPi = 2 * learningRate * Math.exp(-prefFR
-                        / (beta * lowFRBoundary)) * (1 + noise);
+                dPi = ((2 * learningRate * Math.exp(-prefFR
+                        / (beta * lowFRBoundary)))) //+ (0.9 * dPi)) 
+                        * (1 + noise);
                 prefFR += dPi * timeStep;
             } else {
-                double dPi = 0.0;
                 if (prefFR <= lowFRBoundary) {
-                    dPi = learningRate * (prefFR / lowFRBoundary) * (1 + noise);
+                    dPi = ((-learningRate * (prefFR / lowFRBoundary)))
+                    //+ (0.9 * dPi)) 
+                    * (1 + noise);
                 } else {
                     double wTerm = 1 + (Math.log(1
                             + (alpha * ((prefFR / lowFRBoundary) - 1)))
                             / alpha);
-                    dPi = learningRate * wTerm * (1 + noise);
+                    dPi = ((-learningRate * wTerm))// + (0.9 * dPi))
+                            * (1 + noise);
                 }
-                prefFR -= dPi * timeStep;
+                prefFR += dPi * timeStep;
             }
 
             // Neurons cannot fall below a minimum preferred firing rate

@@ -52,34 +52,39 @@ public class SymmetricSTDPRule extends STDPRule{
 
     private double delta_w = 0;
     
-    public static double coef = 1.0 / (2*Math.PI*8000);
-    
     @Override
     public void update(Synapse synapse) {
         final double str = synapse.getStrength();
-        final double delta_t = ((((SpikingNeuronUpdateRule) synapse
-                .getSource().getUpdateRule()).getLastSpikeTime())
-                - ((SpikingNeuronUpdateRule) synapse
-                        .getTarget().getUpdateRule()).getLastSpikeTime())
-                        * (hebbian ? 1 : -1); // Reverse time window for
-        double pfr = ((IPIFRule) synapse.getTarget()
-                .getUpdateRule()).getEstFR();
-        double wm;
-        double tm;
-        if (pfr < 55) {
-            wm = (((-W_plus - W_minus) / 55) * pfr) + W_minus;
-            tm = (((tau_plus - tau_minus) / 55) * pfr) + tau_minus;
-        } else {
-            wm = -W_plus;
-            tm = tau_plus;
-        }
+        if (synapse.getSource().isSpike() || synapse.getTarget().isSpike()) {
+            double delta_t = ((((SpikingNeuronUpdateRule) synapse
+                    .getSource().getUpdateRule()).getLastSpikeTime())
+                    - ((SpikingNeuronUpdateRule) synapse
+                            .getTarget().getUpdateRule()).getLastSpikeTime())
+                            * (hebbian ? 1 : -1); // Reverse time window for
+            delta_t += ThreadLocalRandom.current().nextGaussian()
+                    * (delta_t / 10);
+            double ptfr = ((IPIFRule) synapse.getTarget()
+                    .getUpdateRule()).getEstFR();
+            double psfr = ((IPIFRule) synapse.getSource()
+                    .getUpdateRule()).getEstFR();
+            double pfr = ptfr + psfr;
+            double wm;
+            double tm;
+            if (pfr < 100) {
+                wm = (((-W_plus - W_minus) / 100) * pfr) + W_minus;
+                tm = (((tau_plus - tau_minus) / 100) * pfr) + tau_minus;
+            } else {
+                wm = -W_plus;
+                tm = tau_plus;
+            }
 
-        if (delta_t < 0) {
-            delta_w = W_plus * Math.exp(delta_t / tau_plus)
-                    * learningRate * Math.exp(-Math.abs(str) / 200);
-        } else if (delta_t > 0) {
-            delta_w = -wm * Math.exp(-delta_t / tm)
-                    * learningRate; 
+            if (delta_t < 0) {
+                delta_w = W_plus * Math.exp(delta_t / tau_plus)
+                        * learningRate * Math.exp(-Math.abs(str) / 200);
+            } else if (delta_t > 0) {
+                delta_w = -wm * Math.exp(-delta_t / tm)
+                        * learningRate; 
+            }
         }
         // Subtracts deltaW if inhibitory adds otherwise
         int sign = (int) Math.signum(str);
