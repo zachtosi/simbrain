@@ -19,6 +19,8 @@ package org.simbrain.network.groups;
 
 import java.awt.geom.Point2D;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -166,6 +168,7 @@ public class NeuronGroup extends Group implements CopyableGroup<NeuronGroup> {
      */
     public NeuronGroup(final Network net, final int numNeurons) {
         this(net, new Point2D.Double(0, 0), numNeurons);
+        ptrs = new int[size()];
     }
 
     /**
@@ -324,13 +327,88 @@ public class NeuronGroup extends Group implements CopyableGroup<NeuronGroup> {
             inputIndex = 0;
         }
         if (isSpikingNeuronGroup()) {
-            setInputValues(testData[inputIndex]);
+            setInputValuesSpecial();
+           // setInputValues(testData[inputIndex]);
 //            Network.updateNeurons(neuronList);
         } else {
             forceSetActivations(testData[inputIndex]);
         }
         inputIndex++;
     }
+    private double tAdd = 0;
+
+    public void setInputValuesSpecial() {
+        boolean executed = false;
+        for (int i = 0; i < size(); i++) {
+//            System.out.println(ptrs.length);
+//            System.out.println(testData.length);
+            if (ptrs[i] < testData[i].length) {
+                executed = true;
+                if (testData[i][ptrs[i]] + tAdd
+                        <= getParentNetwork().getTime()) {
+                    ptrs[i]++;
+                    neuronList.get(i).setInputValue(1);
+                } else {
+                    neuronList.get(i).setInputValue(0);
+                }
+            }
+        }
+        if (!executed) {
+            for (int i = 0; i < size(); i++) {
+                ptrs[i] = 0;
+            }
+            tAdd = getParentNetwork().getTime();
+        }
+    }
+
+    public void setTestDataSpiking(String filename) {
+        try (FileReader fr = new FileReader(filename);
+                Scanner scan = new Scanner(fr);) {
+            int index = 0;
+            ArrayList<ArrayList<Integer>> arr =
+                    new ArrayList<ArrayList<Integer>>();
+            while (scan.hasNextLine()) {
+                arr.add(new ArrayList<Integer>());
+                Scanner sc = new Scanner(scan.nextLine());
+                while (sc.hasNextInt()) {
+                    arr.get(index).add(sc.nextInt());
+                }
+                sc.close();
+                index++;
+            }
+            testData = new double[arr.size()][];
+            index = 0;
+            int c;
+            for (ArrayList<Integer> row : arr) {
+                c = 0;
+                testData[index] = new double[row.size()];
+                for (Integer j : row) {
+                    testData[index][c++] = (double) j.intValue();
+                }
+                index++;
+            }
+            int minVal = Integer.MAX_VALUE;
+            for (int i = 0; i < testData.length; i++) {
+                for (int j = 0; j < testData[i].length; j++) {
+                    if (testData[i][j] < minVal && testData[i][j] != 0) {
+                        minVal = (int) testData[i][j];
+                    }
+                }
+            }
+            for (int i = 0; i < testData.length; i++) {
+                for (int j = 0; j < testData[i].length; j++) {
+                    if (testData[i][j] != 0) {
+                        testData[i][j] -= minVal;
+                    }
+                }
+            }
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            System.exit(1);
+        }
+    }
+    
+    private int[] ptrs = new int[size()];
 
     /**
      * Creates a file which activations will be written to and activates the
@@ -460,6 +538,13 @@ public class NeuronGroup extends Group implements CopyableGroup<NeuronGroup> {
      */
     public List<Neuron> getNeuronList() {
         return Collections.unmodifiableList(neuronList);
+    }
+    
+    /**
+     * @return the neurons in this group.
+     */
+    public List<Neuron> getNeuronListUnsafe() {
+        return neuronList;
     }
 
     /**
@@ -1332,6 +1417,7 @@ public class NeuronGroup extends Group implements CopyableGroup<NeuronGroup> {
         this.testData = testData;
     }
 
+    
     /**
      * Tests if this neuron group can be considered a spiking neuron group
      * and sets that value to true/false acordingly.

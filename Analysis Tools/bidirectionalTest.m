@@ -12,7 +12,6 @@ function bidirectionalTest( wtMat, delays )
     biProps = zeros(3, numD-2);
     index = 1;
     for i = (numD-1):-1:2
-        i
         wtsDC = (wts .* (dlys < dlyVals(i))) ~= 0;
         p = sum(sum(wtsDC)) / N;
         biProps(1, index) = (N/2) * p * p;

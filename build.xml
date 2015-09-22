@@ -4,7 +4,7 @@
 	<property name="version" location="Simbrain3" />
 	<property name="src" location="src" />
 	<property name="bin" location="bin" />
-	<property name="lib" location="lib" />
+	<property name="lib" location="../lib/" />
 	<property name="etc" location="etc" />
 	<property name="dist" location="dist" /> <!-- Put final products here -->
 	<property name="build" location="build" /> 	<!-- Staging area -->
@@ -24,7 +24,7 @@
 	<property name="compile.debug" value="true" />
 
 	<fileset id="lib.jars" dir="${lib}">
-		<include name="**/*.jar" />
+		<include name="../**/*.jar" />
 	</fileset>
 
 	<path id="lib.path">
@@ -37,8 +37,11 @@
 	<target name="compile" description="Compile code">
 		<mkdir dir="${bin}" />
 		<mkdir dir="${lib}" />
+		<echo> ${lib}  </echo>
+		<echo> lib.path </echo>
 		<javac source="1.7" target = "1.7" srcdir="${src}" destdir="${bin}" includeAntRuntime="no" classpathref="lib.path" debug="${compile.debug}">
 		</javac>
+		<echo> $classpathref  </echo>
 		<copy todir="${bin}/${resource}">
 			<fileset dir="${src}/${resource}">
 				<exclude name="**/*.class" />

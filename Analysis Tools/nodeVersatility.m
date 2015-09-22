@@ -1,30 +1,19 @@
-function [ vers, degs ]...
-    = nodeVersatility( wtMat )
+function [ vers ]...
+    = nodeVersatility( wtMat, versVal, show )
 %UNTITLED5 Summary of this function goes here
 %   Detailed explanation goes here
-    ei = sum(wtMat, 2)' > 0;
     len = length(wtMat);
     vers = zeros(1, len);
-    binaryMat = wtMat ~= 0;
-    degs = sum(binaryMat, 1) + sum(binaryMat, 2)';
-    
-    for i = 1:len
-       [~, out, ~] = find(binaryMat(i, :) ~= 0);
-       [in, ~, ~] = find(binaryMat(:, i) ~= 0);
-       neighborDegs = zeros(1, length(in) + length(out));
-       for p = 1:length(in)
-          neighborDegs(1, p) = degs(1, in(p)); 
-       end
-       for q = 1:length(out)
-          neighborDegs(1, q+length(in)) = degs(1, out(q)); 
-       end
-       neighborDegs = abs(neighborDegs - degs(i));
-       neighborDegs = neighborDegs - mean(neighborDegs);
-       neighborDegs = neighborDegs .* neighborDegs;
-       vers(i) = sqrt(sum(neighborDegs)/degs(i));
+    for i = 1:len 
+       out = wtMat(i, :) ~= 0;
+       in = wtMat(:, i) ~= 0;
+       diffs = abs(versVal(i) - nonzeros([versVal(out), versVal(in)]));
+       vers(i) = std(diffs);
     end
-    figure;
-    scatter(degs, vers);
+    if show == 1
+        figure;
+        scatter(versVal, vers);
+    end
     %exDegs = nonzeros(degs .* ei);
     %exVers = nonzeros(vers .* ei);
     %scatter(exDegs, exVers, 'r');

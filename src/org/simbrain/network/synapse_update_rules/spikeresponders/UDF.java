@@ -86,18 +86,37 @@ public class UDF extends JumpAndDecay {
             init(s);
             firstTime = false;
         }
-        final double A;
-        if (s.getSource().isSpike()) {
-        	final double ISI = lastSpikeTime - s.getNetwork().getTime();
-            u = U + (u * (1 - U) * Math.exp(ISI / F));
-            R = 1 + ((R - (u * R) - 1) * Math.exp(ISI / D));
-            A = R * s.getStrength() * u;
-            lastSpikeTime = s.getNetwork().getTime();
-            spikeDecay.update(s, A);
-        } else {
-            spikeDecay.update(s);
-        }
+        int spk = (s.spkArrived() ? 1 : 0);
+        u += s.getNetwork().getTimeStep() * (-u / F)
+                + (U * (1 - u) * spk);
+        double dx = s.getNetwork().getTimeStep() * ((1 - x) / D)
+                - (u * x * spk);
+        I += s.getNetwork().getTimeStep()
+                * ((-I / 20) + (Math.abs(s.getStrength())
+                        * u * x * spk));
+        x += dx;
+        s.setPsr(I * Math.signum(s.getStrength()));
     }
+    double x = 1;
+    double I = 1;
+//    @Override
+//    public void update(Synapse s) {
+//        if (firstTime) {
+//            init(s);
+//            firstTime = false;
+//        }
+//        final double A;
+//        if (s.getSource().isSpike()) {
+//            final double ISI = lastSpikeTime - s.getNetwork().getTime();
+//            u = U + (u * (1 - U) * Math.exp(ISI / F));
+//            R = 1 + ((R - (u * R) - 1) * Math.exp(ISI / D));
+//            A = R * s.getStrength() * u;
+//            lastSpikeTime = s.getNetwork().getTime();
+//            spikeDecay.update(s, A);
+//        } else {
+//            spikeDecay.update(s);
+//        }
+//    }
 
 //    @Override
 //    public String getDescription() {
@@ -186,15 +205,17 @@ public class UDF extends JumpAndDecay {
             F = rand.getRandom();
             spikeDecay.setTimeConstant(6);
         } else {
-            rand.setParam1(0.5);
-            rand.setParam2(0.25);
+            System.out.println("Trigger");
+            rand.setParam1(0.15);
+            rand.setParam2(0.01);
             U = rand.getRandom();
-            rand.setParam1(1100);
-            rand.setParam2(550);
-            D = rand.getRandom();
             rand.setParam1(50);
-            rand.setParam2(25);
+            rand.setParam2(1);
+            D = rand.getRandom();
+            rand.setParam1(750);
+            rand.setParam2(5);
             F = rand.getRandom();
+            System.out.println( U + " " + D + " " + F);
             spikeDecay.setTimeConstant(3);
         }
         u = U;

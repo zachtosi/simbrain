@@ -19,7 +19,11 @@
 	<classpathentry kind="lib" path="lib/swinglabs-0.8.0.jar"/>
 	<classpathentry kind="lib" path="lib/utils.jar"/>
 	<classpathentry kind="lib" path="lib/xstream-1.4.2.jar"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER">
+		<attributes>
+			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="ZProject_simbrain"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="lib" path="lib/jamtio.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

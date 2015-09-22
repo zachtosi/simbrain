@@ -34,19 +34,19 @@ public class ConvolvedJumpAndDecay extends SpikeResponder {
      * {@inheritDoc}
      */
     public void update(final Synapse s) {
-        value = s.getPsr();
-        if (s.getSource().isSpike()) {
+       value = s.getPsr();
+        if (s.spkArrived()) {
             value += jumpHeight * s.getStrength();
         } else {
-            double timeStep = s.getParentNetwork().getTimeStep();
-            value += timeStep * (baseLine - value) / timeConstant;
+            value += s.getParentNetwork().getTimeStep() * (baseLine - value)
+                    / timeConstant;
         }
         s.setPsr(value);
     }
 
     public void update(final Synapse s, double jump) {
         value = s.getPsr();
-        if (s.getSource().isSpike()) {
+        if (s.spkArrived()) {
             value += jump;
         } else {
             double timeStep = s.getParentNetwork().getTimeStep();

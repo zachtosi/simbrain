@@ -18,6 +18,9 @@
  */
 package org.simbrain.util;
 
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.text.NumberFormat;
 import java.util.Locale;
 
@@ -37,6 +40,19 @@ public class SimbrainConstants {
     public static final NumberFormat LOCAL_FORMATTER = NumberFormat
         .getNumberInstance(Locale.getDefault());
 
+    private static FileWriter DBFR;
+    public static PrintWriter Debug_stream;
+    
+    static {
+        try {
+           DBFR = new FileWriter("debug");
+           Debug_stream = new PrintWriter(DBFR);
+        } catch (IOException ie) {
+            
+        }
+    }
+   
+    
     /**
      * Used to indicate if an object (in particular neurons) have a polarity,
      * i.e. are specifically excitatory or inhibitory.  Convenience methods

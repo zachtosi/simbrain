@@ -160,6 +160,8 @@ public enum ProbDistribution {
             // standard deviation of the resulting lognormal distribution
             // rather than the mean and standard deviation of the normal
             // distribution beneath it.
+//            return Math.exp((ThreadLocalRandom.current().nextGaussian() * std)
+//                    + mean);
             double mos = std / mean;
             double correctedStd = Math.sqrt(Math.log((mos * mos) + 1));
             double correctedMean = Math.log(mean / correctedStd);
@@ -228,7 +230,7 @@ public enum ProbDistribution {
          */
         @Override
         public double nextRand(double mean, double std) {
-            return (ThreadLocalRandom.current().nextGaussian() + mean) * std;
+            return (ThreadLocalRandom.current().nextGaussian() * std) + mean;
         }
 
         /**

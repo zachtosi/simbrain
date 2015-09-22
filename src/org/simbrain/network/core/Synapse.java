@@ -85,10 +85,10 @@ public class Synapse {
     private double increment = 1;
 
     /** Upper limit of synapse. */
-    private double upperBound = 100;
+    private double upperBound = 1000000;
 
     /** Lower limit of synapse. */
-    private double lowerBound = -100;
+    private double lowerBound = -1000000;
 
     /** Time to delay sending activation to target neuron. */
     private int delay;
@@ -108,17 +108,27 @@ public class Synapse {
      */
     private boolean frozen;
 
-    /** Manages synaptic delay */
-    private double[] delayManager;
+//    /** Manages synaptic delay */
+//    private double[] delayManager;
+//
+//    /**
+//     * Points to the location in the delay manager that corresponds to the
+//     * current time.
+//     */
+//    private int dlyPtr = 0;
 
-    /**
-     * Points to the location in the delay manager that corresponds to the
-     * current time.
-     */
-    private int dlyPtr = 0;
+//    /** The value {@link #dlyPtr} points to in the delay manager. */
+//    private double dlyVal = 0;
 
-    /** The value {@link #dlyPtr} points to in the delay manager. */
-    private double dlyVal = 0;
+    private long auxVal = 0;
+
+    public void setAuxVal(final long auxVal) {
+	this.auxVal = auxVal;
+    }
+
+    public long getAuxVal() {
+	return auxVal;
+    }
 
     /**
      * This special tag denotes that the synapse is a template to other
@@ -252,6 +262,7 @@ public class Synapse {
         setDelay(s.getDelay());
         setFrozen(s.isFrozen());
         s.initSpikeResponder();
+	setAuxVal(s.getAuxVal());
         isTemplate = s.isTemplate;
     }
     
@@ -301,6 +312,22 @@ public class Synapse {
         }
     }
 
+    private long spikes = 0;
+    
+    private double lastSpkArrival = 0;
+    
+    private boolean spkArr;
+    
+    public boolean spkArrived() {
+        return spkArr;
+    }
+    
+    public double getLastSpkArrival() {
+        return lastSpkArrival;
+    }
+    
+    private int en = 1;
+    
     /**
      * For spiking source neurons, returns the spike-responder's value times the
      * synapse strength. For non-spiking neurons, returns the pre-synaptic
@@ -309,22 +336,23 @@ public class Synapse {
      * @return the post-synaptic response as determined by a spike responder.
      */
     public double calcPSR() {
-        if (!enabled) {
-            return 0;
-        } else {
-            if (spikeResponder != null) {
-                spikeResponder.update(this);
-            } else {
-                return calcWeightedSum();
-            }
-            if (delay == 0) {
-                return psr;
-            } else {
-                dlyVal = dequeu();
-                enqueu(psr);
-                return dlyVal;
-            }
+        //            if (spikeResponder != null) {
+        //                spikeResponder.update(this);
+        //            } else {
+        //                return calcWeightedSum();
+        //            }
+        spikeResponder.update(this);
+        //                dlyVal = dequeu();
+        spikes = spikes << 1;
+        if (source.isSpike()) {
+            spikes |= 1l;
         }
+        spkArr = ((spikes >>> delay) & 1l) == 1;
+        if (spkArr) {
+            lastSpkArrival = this.getParentNetwork().getTime();
+        }
+        //                enqueu(psr);
+        return psr;
     }
 
     /**
@@ -340,9 +368,10 @@ public class Synapse {
         } else {
             psr = source.getActivation() * strength;
             if (delay != 0) {
-                dlyVal = dequeu();
-                enqueu(psr);
-                return dlyVal;
+//                dlyVal = dequeu();
+//                enqueu(psr);
+//                return dlyVal;
+                return psr;
             } else {
                 return psr;
             }
@@ -419,7 +448,7 @@ public class Synapse {
             return;
         }
         if (!isFrozen()) {
-            strength = clip(source.getPolarity().clip(wt));
+            strength = source.getPolarity().clip(wt);
         }
     }
 
@@ -428,7 +457,7 @@ public class Synapse {
      * @param wt
      *            the value to set the strength of the synapse to
      */
-    public void forceSetStrength(final double wt) {
+    public synchronized void forceSetStrength(final double wt) {
         strength = wt;
     }
 
@@ -653,18 +682,18 @@ public class Synapse {
         }
         delay = dly;
 
-        if (delay <= 0) {
-            delayManager = null;
-
-            return;
-        }
-
-        delayManager = new double[delay];
-
-        for (int i = 0; i < delay; i++) {
-            delayManager[i] = 0;
-        }
-        dlyPtr = 0;
+//        if (delay <= 0) {
+//            delayManager = null;
+//
+//            return;
+//        }
+//
+//        delayManager = new double[delay];
+//
+//        for (int i = 0; i < delay; i++) {
+//            delayManager[i] = 0;
+//        }
+//        dlyPtr = 0;
     }
 
     //
@@ -699,29 +728,29 @@ public class Synapse {
         return delay;
     }
 
-    /**
-     * @return the deque.
-     */
-    private double dequeu() {
-        if (dlyPtr == delay) {
-            dlyPtr = 0;
-        }
-        return delayManager[dlyPtr++];
-    }
-
-    /**
-     * Enqueeu.
-     *
-     * @param val
-     *            Value to enqueu
-     */
-    private void enqueu(final double val) {
-        if (dlyPtr == 0) {
-            delayManager[delay - 1] = val;
-        } else {
-            delayManager[dlyPtr - 1] = val;
-        }
-    }
+//    /**
+//     * @return the deque.
+//     */
+//    private double dequeu() {
+//        if (dlyPtr == delay) {
+//            dlyPtr = 0;
+//        }
+//        return delayManager[dlyPtr++];
+//    }
+//
+//    /**
+//     * Enqueeu.
+//     *
+//     * @param val
+//     *            Value to enqueu
+//     */
+//    private void enqueu(final double val) {
+//        if (dlyPtr == 0) {
+//            delayManager[delay - 1] = val;
+//        } else {
+//            delayManager[dlyPtr - 1] = val;
+//        }
+//    }
 
     @Override
     public String toString() {
@@ -752,6 +781,7 @@ public class Synapse {
      */
     public void setEnabled(final boolean enabled) {
         this.enabled = enabled;
+        en = enabled ? 1 : 0;
     }
 
     /**
@@ -975,11 +1005,11 @@ public class Synapse {
         bBuf.putDouble(strength);
         bBuf.putDouble(psr);
         if (delay > 0) {
-            for (double d : delayManager) {
-                bBuf.putDouble(d);
-            }
+//            for (double d : delayManager) {
+//                bBuf.putDouble(d);
+//            }
         }
-        bBuf.putInt(dlyPtr);
+//        bBuf.putInt(dlyPtr);
         byte enFr = 0x0;
         byte en = (byte) (enabled ? 2 : 0);
         byte fr = (byte) (frozen ? 1 : 0);
@@ -994,10 +1024,10 @@ public class Synapse {
         setPsr(byteValues.getDouble());
         if (delay > 0) {
             for (int i = 0; i < delay; i++) {
-                delayManager[i] = byteValues.getDouble();
+//                delayManager[i] = byteValues.getDouble();
             }
         }
-        dlyPtr = byteValues.getInt();
+//        dlyPtr = byteValues.getInt();
         byte enFr = byteValues.get();
         setEnabled(enFr >= 2);
         setFrozen(enFr == 1 || enFr == 3);

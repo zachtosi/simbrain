@@ -6,16 +6,15 @@
       <org.simbrain.world.odorworld.entities.RotatingEntity>
         <animation>
           <imageNames>
-            <string>rotating/mouse/Mouse_0.gif</string>
+            <string>rotating/mouse/Mouse_165.gif</string>
           </imageNames>
-          <animTime>0</animTime>
-          <totalDuration>1</totalDuration>
-          <frameDuration>1</frameDuration>
+          <animTime>3</animTime>
+          <totalDuration>4</totalDuration>
         </animation>
-        <name>Agent_3</name>
-        <id>Entity_9</id>
-        <x>76.0</x>
-        <y>87.0</y>
+        <name>Agent_1</name>
+        <id>Entity_1</id>
+        <x>206.8569</x>
+        <y>151.23132</y>
         <dx>0.0</dx>
         <dy>0.0</dy>
         <parentWorld reference="../../../.."/>
@@ -24,9 +23,13 @@
             <parent class="org.simbrain.world.odorworld.entities.RotatingEntity" reference="../../.."/>
             <id>Sensor_1</id>
             <label>Smell-Left</label>
+            <DEFAULT__RADIUS>23.0</DEFAULT__RADIUS>
             <theta>0.39269908169872414</theta>
             <radius>50.0</radius>
             <currentValue>
+              <double>0.0</double>
+              <double>0.0</double>
+              <double>0.0</double>
               <double>0.0</double>
               <double>0.0</double>
               <double>0.0</double>
@@ -38,9 +41,13 @@
             <parent class="org.simbrain.world.odorworld.entities.RotatingEntity" reference="../../.."/>
             <id>Sensor_2</id>
             <label>Smell-Center</label>
+            <DEFAULT__RADIUS>23.0</DEFAULT__RADIUS>
             <theta>0.0</theta>
             <radius>0.0</radius>
             <currentValue>
+              <double>0.0</double>
+              <double>0.0</double>
+              <double>0.0</double>
               <double>0.0</double>
               <double>0.0</double>
               <double>0.0</double>
@@ -52,6 +59,7 @@
             <parent class="org.simbrain.world.odorworld.entities.RotatingEntity" reference="../../.."/>
             <id>Sensor_3</id>
             <label>Smell-Right</label>
+            <DEFAULT__RADIUS>23.0</DEFAULT__RADIUS>
             <theta>-0.39269908169872414</theta>
             <radius>50.0</radius>
             <currentValue>
@@ -60,32 +68,13 @@
               <double>0.0</double>
               <double>0.0</double>
               <double>0.0</double>
+              <double>0.0</double>
+              <double>0.0</double>
+              <double>0.0</double>
             </currentValue>
           </org.simbrain.world.odorworld.sensors.SmellSensor>
         </sensors>
-        <effectors>
-          <org.simbrain.world.odorworld.effectors.StraightMovement>
-            <parent class="org.simbrain.world.odorworld.entities.RotatingEntity" reference="../../.."/>
-            <id>Effector_1</id>
-            <label>Go-straight</label>
-            <amount>0.0</amount>
-            <scalingFactor>1.0</scalingFactor>
-          </org.simbrain.world.odorworld.effectors.StraightMovement>
-          <org.simbrain.world.odorworld.effectors.Turning>
-            <parent class="org.simbrain.world.odorworld.entities.RotatingEntity" reference="../../.."/>
-            <id>Effector_2</id>
-            <label>Go-left</label>
-            <direction>1.0</direction>
-            <amount>0.0</amount>
-          </org.simbrain.world.odorworld.effectors.Turning>
-          <org.simbrain.world.odorworld.effectors.Turning>
-            <parent class="org.simbrain.world.odorworld.entities.RotatingEntity" reference="../../.."/>
-            <id>Effector_3</id>
-            <label>Go-right</label>
-            <direction>-1.0</direction>
-            <amount>0.0</amount>
-          </org.simbrain.world.odorworld.effectors.Turning>
-        </effectors>
+        <effectors/>
         <behavior class="org.simbrain.world.odorworld.behaviors.StationaryBehavior"/>
         <collision>false</collision>
         <sensorsEnabled>true</sensorsEnabled>
@@ -97,10 +86,9 @@
         </sensorIDGenerator>
         <effectorIDGenerator>
           <rootName>Effector</rootName>
-          <index>4</index>
+          <index>1</index>
         </effectorIDGenerator>
-        <currentlyHeardPhrases/>
-        <heading>0.0</heading>
+        <heading>162.0</heading>
         <manualMotionTurnIncrement>4.0</manualMotionTurnIncrement>
         <manualStraightMovementIncrement>4.0</manualStraightMovementIncrement>
         <entityType>Mouse</entityType>
@@ -108,16 +96,15 @@
       <org.simbrain.world.odorworld.entities.RotatingEntity>
         <animation>
           <imageNames>
-            <string>rotating/mouse/Mouse_180.gif</string>
+            <string>rotating/mouse/Mouse_0.gif</string>
           </imageNames>
           <animTime>0</animTime>
-          <totalDuration>1</totalDuration>
-          <frameDuration>1</frameDuration>
+          <totalDuration>2</totalDuration>
         </animation>
-        <name>Agent_4</name>
-        <id>Entity_10</id>
-        <x>242.0</x>
-        <y>258.0</y>
+        <name>Agent_2</name>
+        <id>Entity_8</id>
+        <x>90.0</x>
+        <y>129.0</y>
         <dx>0.0</dx>
         <dy>0.0</dy>
         <parentWorld reference="../../../.."/>
@@ -126,6 +113,7 @@
             <parent class="org.simbrain.world.odorworld.entities.RotatingEntity" reference="../../.."/>
             <id>Sensor_1</id>
             <label>Smell-Left</label>
+            <DEFAULT__RADIUS>23.0</DEFAULT__RADIUS>
             <theta>0.39269908169872414</theta>
             <radius>50.0</radius>
             <currentValue>
@@ -140,6 +128,7 @@
             <parent class="org.simbrain.world.odorworld.entities.RotatingEntity" reference="../../.."/>
             <id>Sensor_2</id>
             <label>Smell-Center</label>
+            <DEFAULT__RADIUS>23.0</DEFAULT__RADIUS>
             <theta>0.0</theta>
             <radius>0.0</radius>
             <currentValue>
@@ -154,6 +143,7 @@
             <parent class="org.simbrain.world.odorworld.entities.RotatingEntity" reference="../../.."/>
             <id>Sensor_3</id>
             <label>Smell-Right</label>
+            <DEFAULT__RADIUS>23.0</DEFAULT__RADIUS>
             <theta>-0.39269908169872414</theta>
             <radius>50.0</radius>
             <currentValue>
@@ -165,29 +155,7 @@
             </currentValue>
           </org.simbrain.world.odorworld.sensors.SmellSensor>
         </sensors>
-        <effectors>
-          <org.simbrain.world.odorworld.effectors.StraightMovement>
-            <parent class="org.simbrain.world.odorworld.entities.RotatingEntity" reference="../../.."/>
-            <id>Effector_1</id>
-            <label>Go-straight</label>
-            <amount>0.0</amount>
-            <scalingFactor>1.0</scalingFactor>
-          </org.simbrain.world.odorworld.effectors.StraightMovement>
-          <org.simbrain.world.odorworld.effectors.Turning>
-            <parent class="org.simbrain.world.odorworld.entities.RotatingEntity" reference="../../.."/>
-            <id>Effector_2</id>
-            <label>Go-left</label>
-            <direction>1.0</direction>
-            <amount>0.0</amount>
-          </org.simbrain.world.odorworld.effectors.Turning>
-          <org.simbrain.world.odorworld.effectors.Turning>
-            <parent class="org.simbrain.world.odorworld.entities.RotatingEntity" reference="../../.."/>
-            <id>Effector_3</id>
-            <label>Go-right</label>
-            <direction>-1.0</direction>
-            <amount>0.0</amount>
-          </org.simbrain.world.odorworld.effectors.Turning>
-        </effectors>
+        <effectors/>
         <behavior class="org.simbrain.world.odorworld.behaviors.StationaryBehavior"/>
         <collision>false</collision>
         <sensorsEnabled>true</sensorsEnabled>
@@ -199,10 +167,9 @@
         </sensorIDGenerator>
         <effectorIDGenerator>
           <rootName>Effector</rootName>
-          <index>4</index>
+          <index>1</index>
         </effectorIDGenerator>
-        <currentlyHeardPhrases/>
-        <heading>180.0</heading>
+        <heading>0.0</heading>
         <manualMotionTurnIncrement>4.0</manualMotionTurnIncrement>
         <manualStraightMovementIncrement>4.0</manualStraightMovementIncrement>
         <entityType>Mouse</entityType>
@@ -212,14 +179,14 @@
   <totalSmellVectorLength>0.0</totalSmellVectorLength>
   <wrapAround>true</wrapAround>
   <objectsBlockMovement>true</objectsBlockMovement>
-  <height>418</height>
-  <width>395</width>
+  <height>450</height>
+  <width>450</width>
   <entityIDGenerator>
     <rootName>Entity</rootName>
-    <index>11</index>
+    <index>9</index>
   </entityIDGenerator>
   <agentNameGenerator>
     <rootName>Agent</rootName>
-    <index>5</index>
+    <index>3</index>
   </agentNameGenerator>
 </org.simbrain.world.odorworld.OdorWorld>

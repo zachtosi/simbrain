@@ -20,17 +20,22 @@ finalNullSoiStd = std(nullSOI);
 
 figure; hold;
 scatter(inDeg, finalNullMoiMean, 'bo');
+[~, avgOIM, stdOIM] = scatterInDegVsOutOfIns(wts, 0);
+title('Means');
 for i = 1:n
     plot([inDeg(i), inDeg(i)], [finalNullMoiMean(i) - finalNullMoiStd(i), ...
         finalNullMoiMean(i) + finalNullMoiStd(i)]);
 end
+scatter(inDeg, avgOIM, 'r.');
 hold;
 
 
 figure; hold;
 scatter(inDeg, finalNullSoiMean, 'bo');
+title('Std. Devs');
 for i = 1:n
     plot([inDeg(i), inDeg(i)], [finalNullSoiMean(i) - finalNullSoiStd(i), ...
         finalNullSoiMean(i) + finalNullSoiStd(i)]);
 end
+scatter(inDeg, stdOIM, 'r.');
 hold;

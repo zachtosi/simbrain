@@ -1,5 +1,7 @@
 package org.simbrain.special_projects.plasticity_proj;
 
+import java.io.PrintWriter;
+import java.lang.reflect.Field;
 import java.util.concurrent.ThreadLocalRandom;
 
 import org.simbrain.network.core.NetworkUpdateAction;
@@ -15,6 +17,8 @@ public class PrunerAction implements NetworkUpdateAction {
     private double pruneThresholdEx = 0.05;
     
     private double pruneThresholdIn = 0.05;
+    
+    private double minVal = 1E-5;
     
     public PrunerAction(SynapseGroup synGrp) {
         this.synGrp = synGrp;
@@ -47,6 +51,10 @@ public class PrunerAction implements NetworkUpdateAction {
                 }
             }
             for (Synapse s : synGrp.getExcitatorySynapses()) {
+                if (s.getStrength() < minVal) {
+                    synGrp.removeSynapse(s);
+                    continue;
+                }
                 if (Math.abs(s.getStrength()) < max * pruneThresholdEx) {
                     double removeP = (((double) s.getSource().getFanOut().size()
                             / tarSize) + ((double) s.getTarget().getFanIn()
@@ -64,6 +72,10 @@ public class PrunerAction implements NetworkUpdateAction {
                 }
             }
             for (Synapse s : synGrp.getInhibitorySynapses()) {
+                if (s.getStrength() > -minVal) {
+                    synGrp.removeSynapse(s);
+                    continue;
+                }
                 if (s.getStrength() > max * pruneThresholdIn) {
                     double removeP = (((double) s.getSource().getFanOut().size()
                             / tarSize) + ((double) s.getTarget().getFanIn()
@@ -79,5 +91,17 @@ public class PrunerAction implements NetworkUpdateAction {
                     .getTargetNeuronGroup().size()-1)));
         }
         
+    }
+    
+    public void reportAllValsToFile(PrintWriter pw)
+            throws IllegalAccessException {
+        pw.println("\t\t**[" + this.toString() + "]**");
+        for (Field f : PrunerAction.class.getDeclaredFields()) {
+            pw.println("\t" + f.getName() + ": " + f.get(this));
+        }
+    }
+    
+    public String toString() {
+        return "Pruner Action";
     }
 }
