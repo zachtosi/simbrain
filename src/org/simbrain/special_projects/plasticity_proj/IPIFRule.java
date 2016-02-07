@@ -159,7 +159,7 @@ public class IPIFRule extends SpikingNeuronUpdateRule implements
     		} else {
     			alpha = 10;
     			beta = 40;
-    			adaptPar = .2;
+    			adaptPar = ..05;
     			satC = 0;
     			lowFRBoundary = 4;
     		}
