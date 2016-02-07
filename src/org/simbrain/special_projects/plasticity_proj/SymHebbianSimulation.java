@@ -401,10 +401,10 @@ public class SymHebbianSimulation {
                     NETWORK.update();
                 }
                 
-                for (int j = 0; j < NUM_NEURONS; j++) {
-                    ((IPIFRule) LAIP_RES.getNeuronListUnsafe()
-                            .get(j).getUpdateRule()).pushBuffers();
-                }
+//                for (int j = 0; j < NUM_NEURONS; j++) {
+//                    ((IPIFRule) LAIP_RES.getNeuronListUnsafe()
+//                            .get(j).getUpdateRule()).pushBuffers();
+//                }
 
                 // Print out which simulated second we're on
                 if (i % REC_INTERVAL == 0) {
@@ -525,7 +525,7 @@ public class SymHebbianSimulation {
             try {
                 for (Field f : SymHebbianSimulation.class.getDeclaredFields()) {
                     pw.println("\t" + f.getName() + ": "
-                            + f.get(new RunBCMSimulation()));
+                            + f.get(new SymHebbianSimulation()));
                 }
                 pw.println();
                 pw.println("\n"

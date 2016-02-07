@@ -7,8 +7,11 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.lang.reflect.Field;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
@@ -34,6 +37,7 @@ import org.simbrain.network.groups.SynapseGroup;
 import org.simbrain.network.neuron_update_rules.SpikingThresholdRule;
 import org.simbrain.network.synapse_update_rules.StaticSynapseRule;
 import org.simbrain.network.synapse_update_rules.spikeresponders.ConvolvedJumpAndDecay;
+import org.simbrain.network.synapse_update_rules.spikeresponders.UDF;
 import org.simbrain.network.update_actions.ConcurrentBufferedUpdate;
 import org.simbrain.util.SimbrainConstants.Polarity;
 import org.simbrain.util.math.ProbDistribution;
@@ -50,11 +54,15 @@ public class MainSimulation {
      * General Sim parameters |
      * _______________________________________________________________________|
      */
-    private static int NUM_NEURONS = 540;
-    private static int GRID_SPACE = 200; // influences delay times
-    private static int NUM_INPUTS = 4;
-    private static String IN_FILE_NAME = "./ZSim_Inputs/Separation_Test"
-            + "_Inputs_" + NUM_INPUTS + "ch_20Hz_200ms_05ms_bins0.csv";
+    private static int NUM_NEURONS = 500;
+    private static int GRID_SPACE = 50; // influences delay times
+    private static int NUM_INPUTS = 100;
+    private static String IN_FILE_NAME = "./ZSim_Inputs/Generalization_Test"
+    		+ "_Inputs_" + NUM_INPUTS + "ch_20Hz_200ms_05ms_bins3.csv";
+    //private static String IN_FILE_NAME = "./sunny_9-0_358.dat";
+    private static String OUT_PREFIX = "zFinalG";
+    private static File OUTPUT_DIR;
+
     private static String TH_FILE_NAME = "LAIP_Thresholds.mat";
     private static String PF_FILE_NAME = "LAIP_PrefFRs.mat";
     private static String FR_FILE_NAME = "LAIP_FiringRates.mat";
@@ -62,7 +70,7 @@ public class MainSimulation {
     private static double[][] TH_VALS;
     private static double[][] PF_VALS;
     private static int REC_INTERVAL = 1; // seconds
-    private static int TEST_RUNS = 30;
+    private static int TEST_RUNS = 56;
     private static ConcurrentBufferedUpdate NET_UPDATER;
     private static PrunerAction PRUNER;
 
@@ -90,22 +98,101 @@ public class MainSimulation {
      */
     private static SynapseGroup LAIP_RES_SYNS;
     private static SynapseGroup IN_SG;
-    private static final boolean II_STDP_HEB = true;
-    private static final boolean IE_STDP_HEB = true;
-    private static final double I_LR = 2E-6;
-    private static final double E_LR = 2E-6;
-    private static final double II_W_PLUS = 5;
-    private static final double II_W_MINUS = 1;
-    private static final double IE_W_PLUS = 6;
-    private static final double IE_W_MINUS = 1.5;
-    private static final double E_W_PLUS = 5;
-    private static final double E_W_MINUS = 1;
+//    private static final boolean II_STDP_HEB = true;
+//    private static final boolean IE_STDP_HEB = true;
+    private static final double I_LR = 2.5E-6; //5E-2 BCM
+    private static final double E_LR = 2.5E-6; //5E-2 BCM
+    private static final double II_W_PLUS = .25;
+    private static final double II_W_MINUS = 2.5;
+    private static final double IE_W_PLUS = 1;
+    private static final double IE_W_MINUS = 1.25;
+    private static final double EE_W_PLUS = 5;
+    private static final double EE_W_MINUS = 1;
+    private static final double EI_W_PLUS = 5;
+    private static final double EI_W_MINUS = 2.25;
     private static final double II_TAU_PLUS = 20;
-    private static final double II_TAU_MINUS = 100;
+    private static final double II_TAU_MINUS = 20;
     private static final double IE_TAU_PLUS = 20;
-    private static final double IE_TAU_MINUS = 40;
-    private static final double E_TAU_PLUS = 20;
-    private static final double E_TAU_MINUS = 100;
+    private static final double IE_TAU_MINUS = 20;
+    private static final double EE_TAU_PLUS = 30;
+    private static final double EE_TAU_MINUS = 100;
+    private static final double EI_TAU_PLUS = 30;
+    private static final double EI_TAU_MINUS = 60;
+    private static final UDF E_SPK_RESP
+        = new UDF();
+    private static final UDF I_SPK_RESP
+        = new UDF();
+    static {
+        E_SPK_RESP.setTimeConstant(3);
+        I_SPK_RESP.setTimeConstant(6);
+    }
+//    private static final ModifiedBCMRule E_SYN_PLASTICITY =
+//            new ModifiedBCMRule();
+//    private static final ModifiedBCMRule II_SYN_PLASTICITY =
+//            new ModifiedBCMRule();
+//    private static final ModifiedBCMRule IE_SYN_PLASTICITY =
+//            new ModifiedBCMRule();
+    
+    private static final SymmetricSTDPRule EE_SYN_PLASTICITY =
+            new SymmetricSTDPRule();
+    private static final SymmetricSTDPRule EI_SYN_PLASTICITY =
+            new SymmetricSTDPRule();
+    private static final MexicanHatSTDPRule II_SYN_PLASTICITY =
+            new MexicanHatSTDPRule();
+    private static final MexicanHatSTDPRule IE_SYN_PLASTICITY =
+            new MexicanHatSTDPRule();
+    static {
+    	II_SYN_PLASTICITY.sigma = 5;
+    	IE_SYN_PLASTICITY.sigma = 30;
+    }
+    
+//    static {
+//        E_SYN_PLASTICITY.setLearningRate(E_LR);
+//        II_SYN_PLASTICITY.setLearningRate(I_LR);
+//        IE_SYN_PLASTICITY.setLearningRate(I_LR);
+//    }
+    
+    static {
+        EE_SYN_PLASTICITY.setLearningRate(E_LR);
+        EE_SYN_PLASTICITY.setHebbian(true);
+        EE_SYN_PLASTICITY.setSymmetric(true);
+        EE_SYN_PLASTICITY.setSymTau(25);
+        EE_SYN_PLASTICITY.setWtSoftening(30);
+        EE_SYN_PLASTICITY.setTau_plus(EE_TAU_PLUS);
+        EE_SYN_PLASTICITY.setTau_minus(EE_TAU_MINUS);
+        EE_SYN_PLASTICITY.setW_minus(EE_W_MINUS);
+        EE_SYN_PLASTICITY.setW_plus(EE_W_PLUS);
+        
+        EI_SYN_PLASTICITY.setLearningRate(E_LR);
+        EI_SYN_PLASTICITY.setHebbian(false);
+        EI_SYN_PLASTICITY.setSymmetric(false);
+        EI_SYN_PLASTICITY.setSymTau(10);
+        EI_SYN_PLASTICITY.setWtSoftening(30);
+        EI_SYN_PLASTICITY.setTau_plus(EI_TAU_PLUS);
+        EI_SYN_PLASTICITY.setTau_minus(EI_TAU_MINUS);
+        EI_SYN_PLASTICITY.setW_minus(EI_W_MINUS);
+        EI_SYN_PLASTICITY.setW_plus(EI_W_PLUS);
+
+        IE_SYN_PLASTICITY.setLearningRate(I_LR);
+        IE_SYN_PLASTICITY.setHebbian(true);
+        //IE_SYN_PLASTICITY.setSymmetric(false);
+        //IE_SYN_PLASTICITY.setSymTau(0);
+        //IE_SYN_PLASTICITY.setWtSoftening(20);
+        IE_SYN_PLASTICITY.setTau_plus(IE_TAU_PLUS);
+        IE_SYN_PLASTICITY.setTau_minus(IE_TAU_MINUS);
+        IE_SYN_PLASTICITY.setW_minus(IE_W_MINUS);
+        IE_SYN_PLASTICITY.setW_plus(IE_W_PLUS);
+        
+        II_SYN_PLASTICITY.setLearningRate(I_LR);
+        II_SYN_PLASTICITY.setHebbian(true);
+//        II_SYN_PLASTICITY.setSymmetric(false);
+//        II_SYN_PLASTICITY.setSymTau(0);
+//        II_SYN_PLASTICITY.setWtSoftening(40);
+        II_SYN_PLASTICITY.setTau_plus(II_TAU_PLUS);
+        II_SYN_PLASTICITY.setTau_minus(II_TAU_MINUS);
+        II_SYN_PLASTICITY.setW_minus(II_W_MINUS);
+        II_SYN_PLASTICITY.setW_plus(II_W_PLUS);
+    }
 
     /*
      * Values that all synapses take on at the very begining. This should be low
@@ -113,31 +200,31 @@ public class MainSimulation {
      * depression through STDP combined with SynapsePruning causes some of these
      * synapses to "grow" by taking on values > 0 and others to wither.
      */
-    private static final double startingWtExFl = 0.01;
-    private static final double startingWtExCl = 0.011;
-    private static final double startingWtInFl = 0.01;
-    private static final double startingWtInCl = 0.011;
+    private static final double startingWtExFl = .001; //0.01
+    private static final double startingWtExCl = .0011;
+    private static final double startingWtInFl = .001; //0.01
+    private static final double startingWtInCl = .0011;
 
     /*
      * _______________________________________________________________________ |
      * Input parameters |
-     * _______________________________________________________________________|
+     * _______________________________________________________________________ |
      */
     private static final ProbDistribution IN_SYN_DIST = ProbDistribution.LOGNORMAL;
-    private static final double DIST_PARAM_1 = 3; // "Location" if dist is
+    private static final double DIST_PARAM_1 = 1.5; // "Location" if dist is
                                                   // lognormal
-    private static final double DIST_PARAM_2 = 4; // "Scale" if dist is
+    private static final double DIST_PARAM_2 = 1.5; // "Scale" if dist is
                                                   // lognormal
     // 1 meaning all possible connections exist from the input neurons to the
     // output neurons, and 0 meaning that no synapses will be constructed
     // between the input and the output.
-    private static double IN_DENSITY = 1; // make this closer to 1 for less
+    private static double IN_DENSITY = .05;//0.5; // make this closer to 1 for less
     // inputs and closer to 0 for less inputs/more res neurons
 
     /*
      * _______________________________________________________________________ |
      * Neuron and neuronal plasticity parameters |
-     * _______________________________________________________________________|
+     * _______________________________________________________________________ |
      */
     private static final double NOISE_MEAN = 0; // nA
     private static final double NOISE_STD = 0.2; // nA
@@ -145,6 +232,7 @@ public class MainSimulation {
     private static final double EXCITE_TAU = 30; // ms
     private static final double INHIB_REF = 2.0; // ms
     private static final double EXCITE_REF = 3.0; // ms
+    private static final double THRESHOLD = 15; // mV
     private static final double I_BG = 13.5; // nA
     private static final double RESET_POTENTIAL = 13.5; // mV, use 10 for larger
                                                         // sims
@@ -155,17 +243,17 @@ public class MainSimulation {
     private static final boolean USING_IP = true; // Turns on or off all
                                                   // neuronal plasticity
 
-    private static final double DEFAULT_INIT_PFR = 0.1; // Hz or Spks/s
+    private static final double DEFAULT_INIT_PFR = 1; // Hz or Spks/s
     // private static final double FR_ESTIMATE_TAU = 1000; // ms
-    private static final double INITIAL_HOMEOSTATIC_CONST = 1E7;
+    private static final double INITIAL_HOMEOSTATIC_CONST = 1E5;
     private static final double FINAL_HOMEOSTATIC_CONST = 1E5;
-    private static final double HOMEOSTATIC_COOLING_RATE = 5E-5;
-    private static final double INITIAL_IP_CONST = 1;// 1;
-    private static final double FINAL_IP_CONST = 1E-6;
-    private static final double INTRINSIC_COOLING_RATE = 5E-5;
+    private static final double HOMEOSTATIC_COOLING_RATE =1E-5;
+    private static final double INITIAL_IP_CONST = .1;// 1;
+    private static final double FINAL_IP_CONST = 1E-7;
+    private static final double INTRINSIC_COOLING_RATE = 1E-5;
     private static final double ALPHA_IP = 1;// 5;
-    private static final double BETA_IP = 100;
-    private static final double LOW_FR_BOUNDARY = 2; // Hz or Spks/s
+    private static final double BETA_IP = 20;
+    private static final double LOW_FR_BOUNDARY = 1; // Hz or Spks/s
 
     /**
      * ________________________________________________________________________
@@ -175,6 +263,7 @@ public class MainSimulation {
      *            ________________________________________________________________________
      */
     public static void main(String[] args) {
+        initOutput();
         System.out.println(Runtime.getRuntime().availableProcessors());
         buildNetwork();
         TH_VALS = new double[1 + (TEST_RUNS * TEST_DATA.length / REC_INTERVAL)]
@@ -254,12 +343,13 @@ public class MainSimulation {
                     .setUsingIP(USING_IP);
         }
         LAIP_RES.stopRecording();
+        boolean inRemoved = false;
         try {
             for (int i = 0, n = TEST_RUNS * TEST_DATA.length; i < n; i++) {
                 c = i;
 
                 if (i % (TEST_DATA.length * 2) == 0
-                        && i < (30 * TEST_DATA.length)) {
+                        && i < (50 * TEST_DATA.length)) {
                     try {
                         printNetworkStats();
                     } catch (IOException ie) {
@@ -278,14 +368,21 @@ public class MainSimulation {
                     }
                 }
 
-                if (i % TEST_DATA.length == 0 && i > 20 * TEST_DATA.length
-                        && !prune) {
+                if (i % TEST_DATA.length == 0 && i > 46 * TEST_DATA.length && !inRemoved) {
                     LAIP_RES_SYNS.setLearningRule(new StaticSynapseRule(),
                             Polarity.BOTH);
+                    //inRemoved = true;
                     if (prune) {
                         prune = false;
                         NETWORK.getUpdateManager().removeAction(PRUNER);
                     }
+                    //System.out.println("REMOVING INPUT.");
+                    //NETWORK.getUpdateManager().clear();
+                    //INPUT_LAYER.setInputMode(false);
+                    //NETWORK.removeGroup(INPUT_LAYER);
+                    //NETWORK.getUpdateManager()
+                    //        .addAction(ConcurrentBufferedUpdate
+                     //               .createConcurrentBufferedUpdate(NETWORK));
                     // Create a new file for spike times
                     LAIP_RES.stopRecording();
                     LAIP_RES.startRecording(new File(
@@ -299,29 +396,15 @@ public class MainSimulation {
                         (NUM_NEURONS * (NUM_NEURONS - 1) * 0.05)) {
                     prune = false;
                     NETWORK.getUpdateManager().removeAction(PRUNER);
+//                    for (Neuron neu : LAIP_RES.getNeuronList()) {
+//                        ((IPIFRule) neu.getUpdateRule()).setFullNorm(true);
+//                    }
                 }
 
                 // Turn off STDP & IP for last test runs
-                if (i == 24 * TEST_DATA.length && !prune) {
+                if (i == 22 * TEST_DATA.length && !prune) {
                     printNetworkStats();
-                    System.out.println("REMOVING INPUT. ADJUSTING HOMEOSTASIS");
-                    NETWORK.getUpdateManager().clear();
-                    INPUT_LAYER.setInputMode(false);
-                    NETWORK.removeGroup(INPUT_LAYER);
-                    NETWORK.getUpdateManager()
-                            .addAction(ConcurrentBufferedUpdate
-                                    .createConcurrentBufferedUpdate(NETWORK));
-                    for (Neuron neu : LAIP_RES.getNeuronList()) {
-                        ((IPIFRule) neu.getUpdateRule()).setIpConst(1E5);
-                        ((IPIFRule) neu.getUpdateRule()).setLearningRate(1E-8);
-                        ((IPIFRule) neu.getUpdateRule()).setAnnealing(false);
-                        ((IPIFRule) neu.getUpdateRule()).setResistance(1);
-                        ((IPIFRule) neu.getUpdateRule())
-                                .setBackgroundCurrent(13.5);
-                        // if (neu.getPolarity() == Polarity.INHIBITORY) {
-                        // ((IPIFRule) neu.getUpdateRule()).setUsingIP(false);
-                        // }
-                    }
+
                 }
                 // // Re-wire the synapse group for the last run.
                 // if (i == (TEST_RUNS - 2) * TEST_DATA.length) {
@@ -333,6 +416,11 @@ public class MainSimulation {
                 synchronized (NETWORK) {
                     NETWORK.update();
                 }
+                
+//                for (int j = 0; j < NUM_NEURONS; j++) {
+//                    ((IPIFRule) LAIP_RES.getNeuronListUnsafe()
+//                            .get(j).getUpdateRule()).pushBuffers();
+//                }
 
                 // Print out which simulated second we're on
                 if (i % REC_INTERVAL == 0) {
@@ -362,15 +450,18 @@ public class MainSimulation {
             MLArray mat = new MLDouble("wts",
                     LAIP_RES_SYNS.getWeightMatrix());
             try {
-                new MatFileWriter().write(FR_FILE_NAME,
-                        Collections.singletonList(spks));
-                ;
-                new MatFileWriter().write(TH_FILE_NAME,
-                        Collections.singletonList(th));
-                new MatFileWriter().write(PF_FILE_NAME,
-                        Collections.singletonList(pf));
-                new MatFileWriter().write("LAIPWtMat.mat",
-                        Collections.singletonList(mat));
+                File f = new File(OUTPUT_DIR, FR_FILE_NAME);
+                f.createNewFile();
+                new MatFileWriter().write(f,Collections.singletonList(spks));
+                File f1 = new File(OUTPUT_DIR, TH_FILE_NAME);
+                f1.createNewFile();
+                new MatFileWriter().write(f1, Collections.singletonList(th));
+                File f2 = new File(OUTPUT_DIR, PF_FILE_NAME);
+                f2.createNewFile();
+                new MatFileWriter().write(f2, Collections.singletonList(pf));
+                File f3 = new File(OUTPUT_DIR, "LAIPTwMat.mat");
+                f3.createNewFile();
+                new MatFileWriter().write(f3, Collections.singletonList(mat));
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -388,10 +479,12 @@ public class MainSimulation {
             double time = LAIP_RES.getParentNetwork().getTime();
             MLArray mat = new MLDouble("wtMat",
                     LAIP_RES_SYNS.getWeightMatrix());
-            new MatFileWriter("LAIPWtMatCheckIn"
-                    + time + ".mat", Collections.singletonList(mat));
+            File f1 = new File(OUTPUT_DIR, time + "LAIPWtMatCheckIn.mat");
+            f1.createNewFile();
+            new MatFileWriter(f1, Collections.singletonList(mat));
             int k = 0;
             double[] frs = new double[LAIP_RES.size()];
+            double[] efrs = new double[LAIP_RES.size()];
             double[] pfrs = new double[LAIP_RES.size()];
             double[] ths = new double[LAIP_RES.size()];
             System.out.println(((IPIFRule) LAIP_RES
@@ -402,6 +495,9 @@ public class MainSimulation {
                 frs[k] = ((SpikingNeuronUpdateRule) neuron
                         .getUpdateRule())
                         .getFrequency(neuron);
+                efrs[k] = ((IPIFRule) neuron
+                        .getUpdateRule())
+                        .getEstFR();
                 ((SpikingNeuronUpdateRule) neuron.getUpdateRule())
                         .resetCounter(neuron);
                 pfrs[k] = ((IPIFRule) neuron
@@ -415,79 +511,104 @@ public class MainSimulation {
                 k++;
             }
             MLArray spks = new MLDouble("FiringRates", frs, 1);
-            new MatFileWriter(time + FR_FILE_NAME,
-                    Collections.singletonList(spks));
+            File f2 = new File(OUTPUT_DIR, time + FR_FILE_NAME);
+            f2.createNewFile();
+            new MatFileWriter(f2, Collections.singletonList(spks));
             MLArray pref = new MLDouble("PrefFRs", pfrs, 1);
-            new MatFileWriter(time + "PrefFRs.mat",
-                    Collections.singletonList(pref));
+            File f3 = new File(OUTPUT_DIR, time + "PrefFRs.mat");
+            f3.createNewFile();
+            new MatFileWriter(f3, Collections.singletonList(pref));
             MLArray thresh = new MLDouble("Thresholds", ths, 1);
-            new MatFileWriter(time + "Thresholds.mat",
-                    Collections.singletonList(thresh));
+            File f4 = new File(OUTPUT_DIR, time + "Thresholds.mat");
+            f4.createNewFile();
+            new MatFileWriter(f4, Collections.singletonList(thresh));
+            MLArray espks = new MLDouble("EstFiringRates", efrs, 1);
+            File f5 = new File(OUTPUT_DIR, time + "EstFRs.mat");
+            f5.createNewFile();
+            new MatFileWriter(f5, Collections.singletonList(espks));
         }
     }
-
-    // public static void printSynChanges(int no) {
-    // ArrayList<Synapse> taggedSyns = new ArrayList<Synapse>();
-    // for (Synapse s : LAIP_RES_SYNS.getAllSynapses()) {
-    // if (s.tag)
-    // taggedSyns.add(s);
-    // }
-    // double [][] strChanges = new double[taggedSyns.size()]
-    // [taggedSyns.get(0).strChanges.length];
-    // System.out.println(strChanges.length);
-    // for (int i = 0, n = strChanges.length; i < n; i++) {
-    // for (int j = 0, m = strChanges[i].length; j < m; j++) {
-    // strChanges[i][j] = taggedSyns.get(i).strChanges[j];
-    // }
-    // }
-    // MLDouble synCh = new MLDouble("synCh", strChanges);
-    // try {
-    // new MatFileWriter("synChanges" + no + ".mat", Collections
-    // .singletonList(synCh));
-    // } catch (IOException ie) {
-    // ie.printStackTrace();
-    // }
-    // }
-
+    
     public static void printParams() {
-        try (PrintWriter pw = new PrintWriter(new FileWriter("Parameters.txt"));) {// Scanner
-                                                                                   // sc
-                                                                                   // =
-                                                                                   // new
-                                                                                   // Scanner(System.in);)
-                                                                                   // {
-            System.out.println("Special notes?");
-            // String notes = sc.nextLine();
-            pw.println("Network Parameters");
-            pw.println("RES Neurons: " + NUM_NEURONS);
-            pw.println("Input Neurons: " + NUM_INPUTS);
-            pw.println("Time-step: " + TIME_STEP);
-            pw.println("Inhib %: " + INHIB_RATIO);
-            pw.println("IP On: " + USING_IP);
-            pw.println();
-            pw.println("Synapse Parameters");
-            pw.println("II_STDP Hebbian: " + II_STDP_HEB);
-            pw.println("IE_STDP Hebbian: " + IE_STDP_HEB);
-            pw.println("E-STDP Learning Rate: " + E_LR);
-            pw.println("I-STDP Learning Rate: " + I_LR);
-            pw.println("II_W_PLUS: " + II_W_PLUS);
-            pw.println("II_W_MINUS: " + II_W_MINUS);
-            pw.println("IE_W_PLUS: " + IE_W_PLUS);
-            pw.println("IE_W_MINUS: " + IE_W_MINUS);
-            pw.println("E_W_PLUS: " + E_W_PLUS);
-            pw.println("E_W_MINUS: " + E_W_MINUS);
-            pw.println("Start wt val:" + startingWtExFl);
-            pw.println();
-            pw.println("Neuron Parameters");
-            IPIFRule example = (IPIFRule) LAIP_RES
-                    .getNeuronList().get(0).getUpdateRule();
-            pw.println("Alpha: " + example.getAlpha());
-            pw.println("StartIP Const.: " + example.getIpConst());
-            pw.println("Start Learning Rate: " + example.getLearningRate());
-            pw.println("Beta: " + example.getBeta());
-            pw.println("Small FR Threshold: " + example.getLowFRBoundary());
-            pw.println("Tau_a: " + example.getTauA());
-            pw.println();
+        File paramF = new File(OUTPUT_DIR, "Parameters.txt");
+       try {
+           paramF.createNewFile();
+       } catch (Exception e) {
+           e.printStackTrace();
+           System.exit(1);
+       }
+        try (   FileWriter fw = new FileWriter(paramF);
+                PrintWriter pw = new PrintWriter(fw);) {
+            pw.println("\t" + MainSimulation.class.getName());
+            pw.println("\n"
+                    + "========================================================"
+                    + "============================================\n"
+                    + "\t\tGLOBAL PARAMS (may overlap w/ Neuron/Synapse Params)\n"
+                    + "======================================================="
+                    + "=============================================\n");
+            try {
+                for (Field f : MainSimulation.class.getDeclaredFields()) {
+                    pw.println("\t" + f.getName() + ": "
+                            + f.get(new MainSimulation()));
+                }
+                pw.println();
+                pw.println("\n"
+                        + "===================================================="
+                        + "================================================\n"
+                        + "\t\tNEURON PARAMS\n"
+                        + "===================================================="
+                        + "================================================\n");
+                IPIFRule Iproto = null;
+                IPIFRule Eproto = null;
+                for (Neuron n : LAIP_RES.getNeuronList()) {
+                    if (n.getPolarity() == Polarity.EXCITATORY) {
+                        Eproto = (IPIFRule) n.getUpdateRule();
+                    }
+                    if (n.getPolarity() == Polarity.INHIBITORY) {
+                        Iproto = (IPIFRule) n.getUpdateRule();
+                    }
+                    if (Iproto != null && Eproto != null) {
+                        break;
+                    }
+                }
+                pw.println("\n[ EXCITATORY ]\n");
+                Eproto.reportAllValsToFile(pw);
+                pw.println("\n[ INHIBITORY ]\n");
+                Iproto.reportAllValsToFile(pw);
+                pw.println();
+                
+                pw.println("\n"
+                        + "===================================================="
+                        + "================================================\n"
+                        + "\t\tSYNAPSE PARAMS\n"
+                        + "===================================================="
+                        + "================================================\n");
+                pw.println("\n[ EXCITATORY ]\n");
+                pw.println(E_SPK_RESP.getClass().getName());
+                EE_SYN_PLASTICITY.reportAllValsToFile(pw);
+                pw.println();
+                pw.println("\n[ INHIBITORY-EXCITATORY ]\n");
+                pw.println(I_SPK_RESP.getClass().getName());
+                pw.println();
+                IE_SYN_PLASTICITY.reportAllValsToFile(pw);
+                pw.println("\n[ INHIBITORY-INHIBITORY ]\n");
+                pw.println(I_SPK_RESP.getClass().getName());
+                pw.println();
+                II_SYN_PLASTICITY.reportAllValsToFile(pw);
+                pw.println();
+                
+                pw.println("\n"
+                        + "===================================================="
+                        + "================================================\n"
+                        + "\t\tPRUNER PARAMS\n"
+                        + "===================================================="
+                        + "================================================\n");
+                PRUNER.reportAllValsToFile(pw);
+                pw.println();
+                
+            } catch (IllegalAccessException iae) {
+                iae.printStackTrace();
+            }
             // pw.println(notes);
         } catch (IOException ie) {
             ie.printStackTrace();
@@ -526,6 +647,8 @@ public class MainSimulation {
             lif.setLowFRBoundary(LOW_FR_BOUNDARY);
             lif.setPrefFR(DEFAULT_INIT_PFR);
             lif.setResetPotential(RESET_POTENTIAL);
+            lif.setThreshold(THRESHOLD);
+            lif.setUseFRApprox(false);
 
             if (Math.random() < INHIB_RATIO) {
                 neuron.setPolarity(Polarity.INHIBITORY);
@@ -542,6 +665,7 @@ public class MainSimulation {
             neuron.setUpdateRule(lif);
             neuron.randomize();
         }
+        //gridStylePlacement(neurons, GRID_SPACE);
         LAIP_RES = new NeuronGroup(NETWORK, neurons);
         LAIP_RES.setLabel("LAIP_Reservoir");
 
@@ -561,12 +685,8 @@ public class MainSimulation {
         AllToAll con = new AllToAll(false);
         LAIP_RES_SYNS = SynapseGroup.createSynapseGroup(LAIP_RES, LAIP_RES,
                 con, 0.5, exRand, inRand);
-        ConvolvedJumpAndDecay eSR = new ConvolvedJumpAndDecay();
-        ConvolvedJumpAndDecay iSR = new ConvolvedJumpAndDecay();
-        eSR.setTimeConstant(3);
-        iSR.setTimeConstant(6);
-        LAIP_RES_SYNS.setSpikeResponder(eSR, Polarity.EXCITATORY);
-        LAIP_RES_SYNS.setSpikeResponder(iSR, Polarity.INHIBITORY);
+        LAIP_RES_SYNS.setSpikeResponder(E_SPK_RESP, Polarity.EXCITATORY);
+        LAIP_RES_SYNS.setSpikeResponder(I_SPK_RESP, Polarity.INHIBITORY);
 //        LAIP_RES_SYNS.setSpikeResponder(new UDF(), Polarity.BOTH);
         LAIP_RES_SYNS.setLabel("Recurrent Synapses");
 
@@ -579,66 +699,52 @@ public class MainSimulation {
             double dist = Network
                     .getEuclideanDist(s.getSource(), s.getTarget());
             double delay = Math.round(dist / (450)) + 1;
-
+//            delay *= delay;
+//            delay /= 15;
+//            delay += 1;
             s.setDelay((int) delay);
-            if (Math.random() < 0.01) {
-                System.out.println(delay * 0.5);
-            }
+//            if (Math.random() < 0.01) {
+//                System.out.println((int)delay * 0.5);
+//            }
         }
-
-        SymmetricSTDPRule dummy = new SymmetricSTDPRule();
-        // ModifiedBCMRule dummy = new ModifiedBCMRule();
-        LAIP_RES_SYNS.setLearningRule(dummy, Polarity.INHIBITORY);
-
-        SymmetricSTDPRule iiSTDP = new SymmetricSTDPRule();
-        iiSTDP.setSymmetric(true);
-        iiSTDP.setSymTau(5);
-        // ModifiedBCMRule iiSTDP = new ModifiedBCMRule();
-        iiSTDP.setLearningRate(I_LR);
-        iiSTDP.setTau_minus(II_TAU_MINUS);
-        iiSTDP.setTau_plus(II_TAU_PLUS);
-        iiSTDP.setW_plus(II_W_PLUS);
-        iiSTDP.setW_minus(II_W_MINUS);
-        iiSTDP.setHebbian(II_STDP_HEB);
-
-        SymmetricSTDPRule ieSTDP = new SymmetricSTDPRule();
-        ieSTDP.setSymmetric(true);
-        ieSTDP.setSymTau(2);
-        // ModifiedBCMRule ieSTDP = new ModifiedBCMRule();
-        ieSTDP.setLearningRate(I_LR);
-        ieSTDP.setTau_minus(IE_TAU_MINUS);
-        ieSTDP.setTau_plus(IE_TAU_PLUS);
-        ieSTDP.setW_plus(IE_W_PLUS);
-        ieSTDP.setW_minus(IE_W_MINUS);
-        ieSTDP.setHebbian(IE_STDP_HEB);
+        LAIP_RES_SYNS.setLearningRule(IE_SYN_PLASTICITY, Polarity.INHIBITORY);
         for (Neuron n : neurons) {
             if (n.getPolarity() == Polarity.INHIBITORY) {
                 for (Synapse s : n.getFanOut().values()) {
                     if (s.getTarget().getPolarity() == Polarity.EXCITATORY) {
-                        s.setLearningRule(ieSTDP.deepCopy());
+                        s.setLearningRule(IE_SYN_PLASTICITY.deepCopy());
                     } else {
-                        s.setLearningRule(iiSTDP.deepCopy());
+                        s.setLearningRule(II_SYN_PLASTICITY.deepCopy());
                     }
                 }
             }
         }
-
-        SymmetricSTDPRule eeSTDP = new SymmetricSTDPRule();
-        eeSTDP.setSymmetric(true);
-        eeSTDP.setSymTau(5);
-        // ModifiedBCMRule eeSTDP = new ModifiedBCMRule();
-        eeSTDP.setLearningRate(E_LR);
-        eeSTDP.setTau_minus(E_TAU_MINUS);
-        eeSTDP.setTau_plus(E_TAU_PLUS);
-        eeSTDP.setW_plus(E_W_PLUS);
-        eeSTDP.setW_minus(E_W_MINUS);
-        LAIP_RES_SYNS.setLearningRule(eeSTDP, Polarity.EXCITATORY);
+        LAIP_RES_SYNS.setLearningRule(EE_SYN_PLASTICITY, Polarity.EXCITATORY);
+        LAIP_RES_SYNS.setLearningRule(IE_SYN_PLASTICITY, Polarity.INHIBITORY);
+        for (Neuron n : neurons) {
+            if (n.getPolarity() == Polarity.EXCITATORY) {
+                for (Synapse s : n.getFanOut().values()) {
+                    if (s.getTarget().getPolarity() == Polarity.EXCITATORY) {
+                        s.setLearningRule(EE_SYN_PLASTICITY.deepCopy());
+                    } else {
+                        s.setLearningRule(EI_SYN_PLASTICITY.deepCopy());
+                    }
+                }
+            }
+        }
         NETWORK.addGroup(LAIP_RES_SYNS);
 
         INPUT_LAYER = new NeuronGroup(NETWORK, NUM_INPUTS);
         INPUT_LAYER.setNeuronType(new SpikingThresholdRule());
+        for (Neuron n : INPUT_LAYER.getNeuronList()) {
+        	n.setPolarity(Polarity.EXCITATORY);
+        }
+        
+        //INPUT_LAYER.setTestDataSpiking(IN_FILE_NAME);
+        //TEST_DATA = new double[360000][];
         INPUT_LAYER.setTestData(getData(IN_FILE_NAME));
         INPUT_LAYER.setInputMode(true);
+        TEST_DATA = INPUT_LAYER.getTestData();
         INPUT_LAYER.setLabel("INPUT LAYER");
         NETWORK.addGroup(INPUT_LAYER);
         ConnectNeurons sCon;
@@ -647,6 +753,7 @@ public class MainSimulation {
         } else {
             sCon = new AllToAll(false);
         }
+
         PolarizedRandomizer inputRand = new PolarizedRandomizer(Polarity
                 .EXCITATORY, IN_SYN_DIST);
         inputRand.setParam1(DIST_PARAM_1);
@@ -655,11 +762,21 @@ public class MainSimulation {
                 LAIP_RES, sCon, 1.0, inputRand, inRand);
         IN_SG.setFrozen(true, Polarity.BOTH);
         ConvolvedJumpAndDecay cjd = new ConvolvedJumpAndDecay();
+        cjd.setTimeConstant(3);
         IN_SG.setSpikeResponder(cjd, Polarity.BOTH);
         NETWORK.addGroup(IN_SG);
         for (Synapse s : IN_SG.getAllSynapses()) {
             s.setAuxVal(1);
         }
+//        for (Neuron n : LAIP_RES.getNeuronList()) {
+//            int sc = 0;
+//            for (Synapse s : n.getFanIn()) {
+//                sc += s.getAuxVal();
+//            }
+//            if (sc == 0) {
+//                ((IPIFRule) n.getUpdateRule()).setResistance(2);
+//            }
+//        }
 
         LAIP_RES_SYNS.setUpperBound(100000, Polarity.EXCITATORY);
         LAIP_RES_SYNS.setLowerBound(0, Polarity.EXCITATORY);
@@ -698,13 +815,34 @@ public class MainSimulation {
 
     private static void randomizeNeuronLocation(Random randi, Neuron neuron) {
         neuron.setX(randi.nextInt((int) (Math.sqrt(NUM_NEURONS)
-                * GRID_SPACE / 2)));
+                * GRID_SPACE / Math.sqrt(2))));
         neuron.setY(randi.nextInt((int) (Math.sqrt(NUM_NEURONS)
-                * GRID_SPACE / 2)));
+                * GRID_SPACE / Math.sqrt(2))));
         neuron.setZ(randi.nextInt((int) (Math.sqrt(NUM_NEURONS)
                 * GRID_SPACE * 2)));
     }
 
+    private static void gridStylePlacement(List<Neuron> neurons, int spacing) {
+        double neurEdge = Math.cbrt(NUM_NEURONS);
+        int X = (int) (neurEdge/Math.sqrt(2)) * spacing;
+        int Y = (int) (neurEdge/Math.sqrt(2)) * spacing;
+        int x = 0, y = 0, z = 0;
+        for (Neuron n : neurons) {
+            n.setX(x);
+            n.setY(y);
+            n.setZ(z);
+            x += spacing;
+            if (x >= X) {
+                x = 0;
+                y += spacing;
+            }
+            if (y >= Y) {
+                y = 0;
+                z += spacing;
+            }
+        }
+    }
+    
     public static void rewireSynapseGroup(SynapseGroup synGrp, int iter) {
 
         List<Neuron> targetNeurons = new ArrayList<Neuron>(synGrp
@@ -789,5 +927,25 @@ public class MainSimulation {
             return null;
         }
     }
-
+    
+    public static void initOutput() {
+        Date dNow = new Date( );
+        SimpleDateFormat ft = 
+        new SimpleDateFormat ("yyyy.MM.dd_hh:mm:ss_a_zzz");
+        String dirName = OUT_PREFIX + "_" + ft.format(dNow);
+        File mainOut = new File("./Outputs");
+        if (!mainOut.exists()) {
+            if (!mainOut.mkdir()) {
+                System.err.println("FATAL ERROR: FAILED TO CREATE OR FIND MAIN "
+                        + "OUTPUT DIRECTORY.");
+                System.exit(1);
+            }
+        }
+        OUTPUT_DIR = new File(mainOut, dirName);
+        if (!OUTPUT_DIR.mkdir()) {
+            System.err.println("FATAL ERROR: FAILED TO CREATE INSTANCE "
+                    + "OUTPUT DIRECTORY.");
+            System.exit(1);
+        }
+    }
 }

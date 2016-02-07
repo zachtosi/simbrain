@@ -1,0 +1,86 @@
+[N, ~] = size(wtMat);
+[sumNZA, meanNZA, stdNZA] = statsNZ(abs(wtMat));
+ei = (sum(wtMat, 2) > 0)';
+[sumNZEE, meanNZEE, stdNZEE] = statsNZ(abs(wtMat(ei, ei)));
+stdNumBins = N / 10 + 1;
+wts = wtMat(ei, ei);
+wtValsEx = 10*nonzeros(wts);
+figure; hist(PrefFRs, stdNumBins); title('Pref. Firing Rates (spks/s)');
+figure; hist(FiringRates, stdNumBins);title('Firing Rates (spks/s)');
+figure; hist(nonzeros(wtValsEx), N); title('EPSPs');
+%wtValsEx = wtValsEx(wtValsEx>.5);
+
+%% Plot Weights
+synParmHat = lognfit(nonzeros(wtValsEx));
+%wtValsEx = sort(wtValsEx, 'descend');
+%wtValsEx = wtValsEx(uint32((0.01*length(wtValsEx)):(0.99*length(wtValsEx))));
+wtValsEx = wtValsEx(wtValsEx>.01);
+[BinHeight, Edges] = histcounts(wtValsEx, logspace(-2, 2, 100), 'Normalization','pdf');
+BinCenter = Edges(1:(length(Edges)-1)) + (diff(Edges)./2);
+xs = logspace(log10(min(BinCenter))-1, log10(max(BinCenter))+1, 1000);
+ys = lognpdf(xs, synParmHat(1), synParmHat(2));
+pd = fitdist(wtValsEx, 'loglogistic');
+ysloglogit = pdf(pd, xs);
+figure; 
+subplot(1, 2, 1);
+hold on;
+plot(xs, ys, 'LineWidth', 2);
+plot(xs, ysloglogit,  'LineWidth', 2);
+nz = BinHeight > 0;
+scatter(BinCenter(nz), BinHeight(nz), 65, [0 .6 .4], 'filled');
+set(gca, 'XScale', 'log');
+title('Synaptic Strengths', 'FontSize', 18);
+hold off;
+
+
+%% Plot Firing Rates
+frs = FiringRates > 0.1;
+frParmHat = lognfit(FiringRates(frs));
+[BinHeight, Edges] = histcounts(FiringRates(frs), logspace(-1, 2, 25), 'Normalization','pdf');
+BinCenter = Edges(1:(length(Edges)-1)) + (diff(Edges)./2);
+xs = logspace(log10(min(BinCenter))-1, log10(max(BinCenter))+1, 1000);
+ys = lognpdf(xs, frParmHat(1), frParmHat(2));
+subplot(1, 2, 2);
+hold on;
+plot(xs, ys, 'LineWidth', 2);
+nz = BinHeight > 0;
+scatter(BinCenter(nz), BinHeight(nz), 65, [.4 0 .8], 'filled');
+set(gca, 'XScale', 'log');
+title('Firing Rates', 'FontSize', 18);
+hold off;
+
+%% Mean, std, sum
+%[suIn, mIn, stIn] = statsNZ(wtMat);
+%[suOut, mOut, stOut] = statsNZ(wtMat');
+%wtMatRw = dir_generate_srand(wtMat);
+%[suInRw, mInRw, stInRw] = statsNZ(wtMatRw);
+%[suOutRw, mOutRw, stOutRw] = statsNZ(wtMatRw');
+
+%% Degree
+[kIn, kOut, k] = nodeDegrees(wtMat);
+degPlot(wtMat);
+degPlot(wtMat(ei, ei));
+
+%% Versatility and Connectivity Stats
+[ vers, stdVer, nullMV, nullStVL, nullStVU ]= StatSigVers(wtMat, k, 1); % Degree Versatility
+[avgOIM, stdOIM] = sigScatterInVOut(wtMat, 50);
+[ dynImp ] = dynamicalImportance( wtMat, vers, 1 );
+allRichClubs(wtMat);
+%neighborHist(wtMat(ei, ei));
+
+%% Motifs
+biEx = sum(sum((wtMat(ei, ei) > 0) .* (wtMat(ei, ei)' > 0)));
+N = sum(sum(wtMat(ei, ei) > 0));
+p = N / (sum(ei) * (sum(ei) - 1));
+biRatio = biEx / (N * p * p);
+figure; hold on; title('3-Motifs All', 'FontSize', 18);
+songMotifs(wtMat ~= 0);
+hold off;
+figure; hold on; title('3-Motifs Ex-Ex', 'FontSize', 18);
+SM = songMotifs(wtMat(ei, ei) ~= 0);
+hold off;
+
+
+%% Other
+%dynamicalImportance(wtMat, PrefFRs, 1);
+%diversity(wtMat, PrefFRs, 1);

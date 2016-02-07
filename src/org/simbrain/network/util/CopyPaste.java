@@ -35,10 +35,12 @@ import org.simbrain.network.groups.CopyableGroup;
  * TODO: Move back to GUI? Why here?
  */
 public class CopyPaste {
-
+    
 	/**
 	 * Creates a copy of a list of network model elements: neurons, synapses,
-	 * and groups.
+	 * and groups.  This is called first when a copy happens, then again when paste happens
+	 * (Need to be able to have a copy in case the copied object is deleted.   Needs
+	 * to be copied again on paste in case the parent network changes).
 	 *
 	 * @param newParent parent network for these objects. May be a root network
 	 *            or a subnetwork.
@@ -69,15 +71,14 @@ public class CopyPaste {
 						text);
 				ret.add(newText);
 			} else if (item instanceof CopyableGroup) {
-				Object copy = ((CopyableGroup<?>) item).deepCopy();
+				Object copy = ((CopyableGroup<?>) item).deepCopy(newParent); 
 				ret.add(copy);
 			}
 		}
 
 		// Copy synapses
 		for (Synapse synapse : synapses) {
-			// Parent network for the new synapses inherited from neurons
-			Synapse newSynapse = new Synapse(neuronMappings.get(synapse
+			Synapse newSynapse = new Synapse(newParent, neuronMappings.get(synapse
 					.getSource()), neuronMappings.get(synapse.getTarget()),
 					synapse.getLearningRule().deepCopy(), synapse);
 			ret.add(newSynapse);

@@ -2,5 +2,20 @@
 /build/main
 /build/apidocs
 /dist
+<<<<<<< HEAD
+<<<<<<< HEAD
+/Outputs
+=======
+/scripts/scriptmenu/archives
+>>>>>>> simbrain/master
+=======
+/scripts/scriptmenu/archives
+>>>>>>> simbrain/master
 *.sublime-project
 *.sublime-workspace
+*.classpath
+*.project
+/.idea/*
+./bin/
+*.iml
+out/*

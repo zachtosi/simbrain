@@ -134,6 +134,10 @@ public class SparseConnectionPanel extends AbstractConnectionPanel implements
     /** Whether to allow recurrent connections. */
     private boolean recurrentConnection = false;
 
+    /**
+     * If true then this sparse connection object is being edited, as opposed to
+     * created.
+     */
     private final boolean editing;
 
     /**
@@ -154,7 +158,7 @@ public class SparseConnectionPanel extends AbstractConnectionPanel implements
         sap.initializeLayout();
         return sap;
     }
-
+    
     /**
      * Constructs a gui panel for adjusting the sparsity of a sparse connect
      * neurons object, and initializes all appropriate listeners.
@@ -165,37 +169,53 @@ public class SparseConnectionPanel extends AbstractConnectionPanel implements
      *            the number of target neurons being connected to
      */
     private SparseConnectionPanel(Sparse connection,
-        NetworkPanel networkPanel) {
+            NetworkPanel networkPanel) {
         super();
         editing = connection.getSynapseGroup() != null;
         this.connection = connection;
         if (editing) {
             numTargs = connection.getSynapseGroup().getTargetNeuronGroup()
-                .size();
+                    .size();
             setRecurrent(connection.getSynapseGroup().isRecurrent());
             allowSelfConnect = connection.isSelfConnectionAllowed();
         } else {
-            // Assumes only one source and one target group are slected if any 
+            // Assumes only one source and one target group are selected if any
             // are
-            if (networkPanel.getSelectedModelNeuronGroups().size() > 0) {
-                NeuronGroup source = networkPanel.getSourceModelGroups().get(0);
-                NeuronGroup target =
-                    networkPanel.getSelectedModelNeuronGroups().get(0);
-                numTargs = target.size();
-                setRecurrent(source.equals(target));
-            } else {
-                Set<Neuron> sources =
-                    new HashSet<Neuron>(networkPanel.getSelectedModelNeurons());
-                List<Neuron> targets = networkPanel.getSourceModelNeurons();
-                numTargs = targets.size();
-                int sourcesSize = sources.size();
-                sources.retainAll(targets);
-                int newSize = sources.size();
-                // Counts as recurrent iff all the source neurons are the same 
-                // as all the target neurons.
-                setRecurrent(sourcesSize == newSize);
+            try {
+                if (networkPanel.getSelectedModelNeuronGroups().size() > 0) {
+
+                    NeuronGroup source = networkPanel.getSourceModelGroups()
+                            .get(0);
+                    NeuronGroup target =
+                            networkPanel.getSelectedModelNeuronGroups().get(0);
+                    numTargs = target.size();
+                    setRecurrent(source.equals(target));
+
+                } else {
+                    // Called when Quick Properties (see QuickConnectDialog) is used
+                    Set<Neuron> sources =
+                            new HashSet<Neuron>(networkPanel
+                                    .getSourceModelNeurons());
+                    List<Neuron> targets = networkPanel
+                            .getSelectedModelNeurons();
+                    numTargs = targets.size();
+                    int sourcesSize = sources.size();
+                    sources.retainAll(targets);
+                    int newSize = sources.size();
+                    // Counts as recurrent iff all the source neurons are the
+                    // same
+                    // as all the target neurons.
+                    setRecurrent(sourcesSize == newSize);
+                }
+                synsPerSource.setVisible(numTargs != 0);
+            } catch (IndexOutOfBoundsException e) {
+                setRecurrent(true);
+                numTargs = (int) 1E4;
+                synsPerSource.setVisible(false);
             }
         }
+        
+        
     }
 
     /**

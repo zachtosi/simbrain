@@ -29,6 +29,8 @@ public class SymmetricSTDPRule extends STDPRule{
     /** General learning rate. */
     protected double learningRate = LEARNING_RATE_DEFAULT;
 
+    protected double antiHebbBoost = 0.25;
+    
     @Override
     public void init(Synapse synapse) {
     }
@@ -74,7 +76,8 @@ public class SymmetricSTDPRule extends STDPRule{
     public void update(Synapse synapse) {
         final double str = synapse.getStrength();
         if (synapse.spkArrived() || synapse.getTarget().isSpike()) {
-            double delta_t = (synapse.getLastSpkArrival()
+            double delta_t = (((SpikingNeuronUpdateRule) synapse
+                    .getSource().getUpdateRule()).getLastSpikeTime()
                     - ((SpikingNeuronUpdateRule) synapse
                             .getTarget().getUpdateRule()).getLastSpikeTime())
                             * (hebbian ? 1 : -1); // Reverse time window for
@@ -104,6 +107,7 @@ public class SymmetricSTDPRule extends STDPRule{
                 } else {
                     wm = -W_plus;
                     tm = tau_plus;
+                    eVal = 1;
                 }
             } else {
                 wm = W_minus;
@@ -111,24 +115,54 @@ public class SymmetricSTDPRule extends STDPRule{
                 eVal = 0;
             }
             if (delta_t < 0) {
-                delta_w = learningRate * (W_plus * Math.exp(delta_t / tau_plus) - (eVal * 0.5))
-                        * Math.exp(-Math.abs(str) / wtSoftening);
+                delta_w = (W_plus * Math.exp(delta_t / tau_plus) - (eVal));
+                        //* Math.exp(-Math.abs(str) / wtSoftening);
             } else if (delta_t > 0) {
-                delta_w = (-wm * Math.exp(-delta_t / tm) - (eVal * 0.5))
-                        * learningRate; 
+                delta_w = (-wm * Math.exp(-delta_t / tm) - (eVal));
+                if (!hebbian) {
+                	delta_w+=antiHebbBoost;
+                }
             }
+            delta_w *= learningRate;
         }
+//        double was = Math.abs(str); 
         // Subtracts deltaW if inhibitory adds otherwise
         int sign = (int) Math.signum(str);
         if (sign != 0) {
-            synapse.setStrength(str + (sign * delta_w));
+            synapse.changeStrength((sign * delta_w));
         } else {
             if (synapse.getSource().getPolarity() == Polarity.EXCITATORY) {
-                synapse.setStrength(str + delta_w);
+                synapse.changeStrength(delta_w);
             } else {
-                synapse.setStrength(str - delta_w);
+                synapse.changeStrength(-delta_w);
             }
         }
+//        double is = Math.abs(synapse.getStrength());
+//        if (was < 1 && is >= 1) {
+//            synapse.setDelay(synapse.getDelay() - 2);
+//        }
+//        if (was > 1 && is <= 1) {
+//            synapse.setDelay(synapse.getDelay() + 2);
+//        }
+//        if (was < 5 && is >= 5) {
+//            synapse.setDelay(synapse.getDelay() - 2);
+//        }
+//        if (was > 5 && is <= 5) {
+//            synapse.setDelay(synapse.getDelay() + 2);
+//        }
+//        if (was < 10 && is >= 10) {
+//            synapse.setDelay(synapse.getDelay() - 2);
+//        }
+//        if (was > 10 && is <= 10) {
+//            synapse.setDelay(synapse.getDelay() + 2);
+//        }
+//        if (was < 15 && is >= 15) {
+//            synapse.setDelay(synapse.getDelay() - 2);
+//        }
+//        if (was > 15 && is <= 15) {
+//            synapse.setDelay(synapse.getDelay() + 2);
+//        }
+
     }
 
     private float wtSoftening = 60;

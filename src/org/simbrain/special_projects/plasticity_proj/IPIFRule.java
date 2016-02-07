@@ -1,6 +1,5 @@
 package org.simbrain.special_projects.plasticity_proj;
 
-import java.io.File;
 import java.io.PrintWriter;
 import java.lang.reflect.Field;
 import java.util.concurrent.ThreadLocalRandom;
@@ -8,6 +7,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import org.simbrain.network.core.Neuron;
 import org.simbrain.network.core.SpikingNeuronUpdateRule;
 import org.simbrain.network.neuron_update_rules.interfaces.NoisyUpdateRule;
+import org.simbrain.util.SimbrainConstants.Polarity;
 import org.simbrain.util.math.ProbDistribution;
 import org.simbrain.util.randomizer.Randomizer;
 
@@ -80,16 +80,16 @@ public class IPIFRule extends SpikingNeuronUpdateRule implements
 
     private double adapt = 0;
 
-    private double tauA = 2000;
+    private double tauA = 10000;
 
-    private native float gaussConv(float x);
+ //   private native float gaussConv(float x);
 
-    static {
-        File nativeFile = new File("libipifrule.jnilib");
-        if (!nativeFile.exists())
-            System.exit(1);
-        System.load(nativeFile.getAbsolutePath());
-    }
+//    static {
+//        File nativeFile = new File("libipifrule.jnilib");
+//        if (!nativeFile.exists())
+//            System.exit(1);
+//        System.load(nativeFile.getAbsolutePath());
+//    }
 
     private float approxFR = 0;
 
@@ -132,7 +132,7 @@ public class IPIFRule extends SpikingNeuronUpdateRule implements
         ifn.s = s;
         ifn.m = m;
         ifn.l = l;
-        ifn.setFullNorm(fullNorm);
+        ifn.setFullNorm(fullNormEx);
         ifn.satA = satA;
         ifn.satB = satB;
         ifn.adaptiveTauA = adaptiveTauA;
@@ -140,6 +140,10 @@ public class IPIFRule extends SpikingNeuronUpdateRule implements
         
     }
 
+    double adaptPar = .1;
+    
+    boolean init = false;
+    
     /**
      * {@inheritDoc}
      */
@@ -147,10 +151,25 @@ public class IPIFRule extends SpikingNeuronUpdateRule implements
         // if (ThreadLocalRandom.current().nextDouble() < 0.1) {
         // return;
         // }
+        
+    	if (!init) {
+    		if (neuron.getPolarity() == Polarity.EXCITATORY) {
+    			adaptPar = .1;
+    			satC = 2;
+    		} else {
+    			alpha = 10;
+    			beta = 40;
+    			adaptPar = .2;
+    			satC = 0;
+    			lowFRBoundary = 4;
+    		}
+    		init = true;
+    	}
+    	
         double iSyn = inputType.getInput(neuron);
         
         if (addNoise) {
-            iSyn += ThreadLocalRandom.current().nextGaussian() * 0.25;
+            iSyn += ThreadLocalRandom.current().nextGaussian() * 0.05;
         }
         double timeStep = neuron.getNetwork().getTimeStep();
 
@@ -175,10 +194,17 @@ public class IPIFRule extends SpikingNeuronUpdateRule implements
         double dVm =
                 timeStep
                         * (-(memPotential - restingPotential) + resistance
-                                * (iSyn + backgroundCurrent - (0.1 * adapt)))
+                                * (iSyn + backgroundCurrent - (adaptPar * adapt)))
                         / timeConstant;
 
         memPotential += dVm;
+        
+        //if (neuron.getNetwork().getTime() < 50000) {
+        //    if (ThreadLocalRandom.current().nextInt((int)(1000/neuron
+        //            .getNetwork().getTimeStep())) == 1) {
+        //        memPotential = threshold + 1;
+        //    }
+        //}
 
         // Determine if there was a spike
         if (memPotential >= threshold
@@ -196,38 +222,38 @@ public class IPIFRule extends SpikingNeuronUpdateRule implements
             neuron.setSpkBuffer(false);
             setHasSpiked(false, neuron);
         }
-        if (useFRApprox) {
-            double iSyn_theta = threshold - restingPotential
-                    - backgroundCurrent + (0.1 * adapt);
-            afrBuff = gaussConv((float) (iSyn - iSyn_theta));
-            ss_buff += 0.5f * (approxFR- ss);
-            s_buff += 0.5f * (ss - s);
-            m_buff += 0.1f * (s - m);
-            mafrBuff = (0.9f * s) + (0.1f * m);
-            
-
-//          
-            if (meanApproxFR > l) {
-                l_buff += 0.6 * (meanApproxFR - l);
-            } else {
-                l_buff += 0.05 * (meanApproxFR - l);
-            }
-
-//            if (loc_index == 1 && neuron.getNetwork().getTime() > 1000) {
-//                SimbrainConstants.Debug_stream.print(approxFR + " ");
-//                SimbrainConstants.Debug_stream.print(ss + " ");
-//                SimbrainConstants.Debug_stream.print(s + " ");
-//                SimbrainConstants.Debug_stream.print(m + " ");
-//                SimbrainConstants.Debug_stream.print(meanApproxFR + " ");
-//                SimbrainConstants.Debug_stream.print(l + " ");
-//                SimbrainConstants.Debug_stream.print(getEstFR() + " ");
-//                SimbrainConstants.Debug_stream.print(prefFR+ " ");
-//                SimbrainConstants.Debug_stream.println(this.getSpikeCount());
+//        if (useFRApprox) {
+//            double iSyn_theta = threshold - restingPotential
+//                    - backgroundCurrent + (0.1 * adapt);
+//            afrBuff = gaussConv((float) (iSyn - iSyn_theta));
+//            ss_buff += 0.5f * (approxFR- ss);
+//            s_buff += 0.5f * (ss - s);
+//            m_buff += 0.1f * (s - m);
+//            mafrBuff = (0.9f * s) + (0.1f * m);
+//            
+//
+////          
+//            if (meanApproxFR > l) {
+//                l_buff += 0.6 * (meanApproxFR - l);
+//            } else {
+//                l_buff += 0.05 * (meanApproxFR - l);
 //            }
-
-//            mafrBuff = ((meanApproxFR * count) + (approxFR * approxFR))
-//                    / ++count;
-        }
+//
+////            if (loc_index == 1 && neuron.getNetwork().getTime() > 1000) {
+////                SimbrainConstants.Debug_stream.print(approxFR + " ");
+////                SimbrainConstants.Debug_stream.print(ss + " ");
+////                SimbrainConstants.Debug_stream.print(s + " ");
+////                SimbrainConstants.Debug_stream.print(m + " ");
+////                SimbrainConstants.Debug_stream.print(meanApproxFR + " ");
+////                SimbrainConstants.Debug_stream.print(l + " ");
+////                SimbrainConstants.Debug_stream.print(getEstFR() + " ");
+////                SimbrainConstants.Debug_stream.print(prefFR+ " ");
+////                SimbrainConstants.Debug_stream.println(this.getSpikeCount());
+////            }
+//
+////            mafrBuff = ((meanApproxFR * count) + (approxFR * approxFR))
+////                    / ++count;
+//        }
         neuron.setBuffer(memPotential);
     }
 
@@ -277,12 +303,15 @@ public class IPIFRule extends SpikingNeuronUpdateRule implements
 
     private double dPi = 0;
 
-    private boolean fullNorm = false;
+    private boolean fullNormEx = false;
+    private boolean fullNormIn = false;
     
-    private float satA = 15;
-    private float satB = 20;
+    private float satA = 5; // 10
+    private float satB = 5; // 20
+    private float satC = 2;
     
-    private boolean adaptiveTauA = true;
+    private boolean adaptiveTauA = false;
+    
 
     /**
      * Performs the neuronal plasticity changes that affect the preferred firing
@@ -297,49 +326,95 @@ public class IPIFRule extends SpikingNeuronUpdateRule implements
         // The neuron estimates its firing rate by a decaying amount of
         // arbitrary "resource", which decays faster if the neuron preferrs to
         // fire more frequently.
-        if (adaptiveTauA) {
-            tauA = 10000 / (prefFR + 1);
-        }
+        //if (adaptiveTauA) {
+          //  tauA = 10000 / (prefFR + 1);
+        //}
+        double pfr = prefFR > 50 ? 50 : prefFR;
+    	if (neuron.getPolarity() == Polarity.INHIBITORY) {
+    		tauA = 20000 / (pfr + 2);
+    	}
         adapt += -timeStep * adapt / tauA;
         // final firing rate estimate
         estFR += timeStep * ((adapt / tauA) - estFR);
         // convert from kHz to Hz
         double estFRScale = 1000 * estFR;
 
-        // Determine the difference between the estimate and the preference
-        double deltaFR = prefFR - estFRScale;
-        // Use whichever is larger (estimated or preferred firing rate)
-        // as an attenuating factor.
-        double fac = estFRScale > prefFR ? estFRScale + 1E-5
-                : prefFR + 1E-5;
+
 
         if (usingIP && neuron.getNetwork().getTime() > 1000) {
-
             // Synaptic normalization procedure. Ensures that the sum of
             // incoming synaptic connections cannot exceed a certain value.
             // Leaves synapses undisturbed if their sum is below this value
             // and normalizes them to this value otherwise.
             if (isAnnealing()) {
-                double inSum = 0;
-                // double outSum = 0;
-                for (int i = 0, n = neuron.getFanIn().size(); i < n; i++) {
-                    if (neuron.getFanIn().get(i).getAuxVal() == 0) {
-                        inSum += Math.abs(neuron.getFanIn().get(i)
-                                .getStrength());
-                    }
-                }
-//                double saturationVal = (prefFR * 150) + 200;
-                double saturationVal = (prefFR * satA) + satB;
-                if ((inSum > saturationVal || fullNorm) && inSum != 0) {
+                if (usingIP && neuron.getNetwork().getTime() > 10000) {
+                    double inExSum = 0;
+                    double inInSum = 0;
+                    // double outSum = 0;
+                    int ex = 0;
+                    int in = 0;
                     for (int i = 0, n = neuron.getFanIn().size(); i < n; i++) {
-                        if (neuron.getFanIn().get(i).getAuxVal() == 0) {
-                            double str = neuron.getFanIn().get(i).getStrength();
-                            neuron.getFanIn().get(i).setStrength(saturationVal
-                                    * str / inSum);
+                    	if (neuron.getFanIn().get(i).getAuxVal() == 0) {
+                    		if( neuron.getFanIn().get(i).getStrength() > 0) {
+                    			inExSum += neuron.getFanIn().get(i).getStrength();
+                    			ex++;
+                    		}
+                    		if( neuron.getFanIn().get(i).getStrength() < 0) {
+                    			inInSum -= neuron.getFanIn().get(i).getStrength();
+                    			in++;
+                    		}
+                    	}
+                    }
+
+                    // double saturationVal = (prefFR * 150) + 200;
+//                    double saturationValEx = ((13.5/threshold)*((prefFR+10) / (estFRScale+10))  * (prefFR * satA))
+//                            + satB;
+                    //double saturationValEx = 75*Math.log((prefFR+4.25)/4.25)*((prefFR+10)/(estFRScale+10))+20;
+                    //double saturationValEx = (5 * prefFR * (15/threshold) * (estFRScale+20)/(prefFR+20)) + 50; 
+
+                    double saturationValEx = (threshold/15) * ((pfr*(satA-satC))+estFRScale*satC) + satB;
+                    double sValEx = 20 * ex;
+                    sValEx = (saturationValEx > sValEx) ? sValEx : saturationValEx;
+                    if ((inExSum > sValEx || fullNormEx)) {
+                    	if (!fullNormEx) {
+                    		System.out.println(neuron.getPolarity().title() + " EXC\tTripped!");
+                    	}
+                    	fullNormEx = true;
+                    	for (int i = 0, n = neuron.getFanIn().size(); i < n; i++) {
+                    		if (neuron.getFanIn().get(i).getAuxVal() == 0) {
+                    			if (neuron.getFanIn().get(i).getStrength() > 0) {
+                    				double str = neuron.getFanIn().get(i).getStrength();
+                    				double newstr = sValEx * str / inExSum;
+                    				neuron.getFanIn().get(i).changeStrength(newstr - str);
+                    			}
+                    		}
+                        }
+                    }
+                    
+//                    double saturationValIn = ((threshold/13.5)*((estFRScale+10) / (prefFR+10))  * (prefFR * satA))
+//                            + satB;
+                    //double saturationValIn = (.5*Math.exp(.04*prefFR) + .75) * saturationValEx;
+                    double saturationValIn = (15/threshold) * ((pfr*(satA-satC))+estFRScale*satC) + satB;
+                    double sValIn = 20 * in;
+                    sValIn = (saturationValIn > sValIn) ? sValIn : saturationValIn;
+                    if ((inInSum > sValIn || fullNormIn)) {
+                    	if (!fullNormIn) {
+                    		System.out.println(neuron.getPolarity().title() + " INH\tTripped!");
+                    	}
+                    	fullNormIn = true;
+                    	for (int i = 0, n = neuron.getFanIn().size(); i < n; i++) {
+                    		if (neuron.getFanIn().get(i).getAuxVal() == 0) {
+                    			if (neuron.getFanIn().get(i).getStrength() < 0) {
+                    				double str = neuron.getFanIn().get(i).getStrength();
+                    				double newstr = sValIn * str / inInSum;
+                    				neuron.getFanIn().get(i).changeStrength(newstr - str);
+                    			}
+                    		}
                         }
                     }
                 }
             }
+
             // if (prefFR > 1) {
             // // double outSat = (-3900 * Math.exp(-0.45 * prefFR))
             // // + (3500 * Math.exp(-0.041 * prefFR));
@@ -361,41 +436,60 @@ public class IPIFRule extends SpikingNeuronUpdateRule implements
             // change but very easy for it to change its threshold so as to
             // maintain a given firing rate.
             if (isAnnealing()) {
-                ipConst -= timeStep * homeostaticCooling
-                        * (ipConst - ipConstFinal);
-                learningRate -= timeStep * intrinsicCooling * (learningRate
-                        - learningRateFinal);
+            	ipConst -= timeStep * homeostaticCooling
+            			* (ipConst - ipConstFinal);
+            	learningRate -= timeStep * intrinsicCooling * (learningRate
+            			- learningRateFinal);
             }
 
+            // Determine the difference between the estimate and the preference
+            double deltaFR = prefFR - estFRScale;
+            // Use whichever is larger (estimated or preferred firing rate)
+            // as an attenuating factor.
+            //double fac = estFRScale > prefFR ? estFRScale + 1E-5
+           // 		: prefFR + 1E-5;
+
+            double thVal = 1;
+            // Adjust the preferred firing rate so as to bring it closer to
+            // the preferred firing rate
+            double noise = ProbDistribution.NORMAL.nextRand(0, 0.05);
+            if (estFRScale > prefFR) {
+            	dPi = ((learningRate * Math.exp(-prefFR
+            			/ (beta * lowFRBoundary)))) // + (0.9 * dPi))
+            			* (1 + noise);
+            	prefFR += dPi * timeStep * invLogitDer((prefFR/estFRScale) - 1);
+            	//thVal = 2;
+            } else {
+            	if (prefFR <= lowFRBoundary) {
+            		dPi = ((-learningRate * (prefFR / lowFRBoundary)))
+            				// + (0.9 * dPi))
+            				* (1 + noise);
+
+            		//thVal = 0.5;
+            	} else {
+            		double wTerm = 1 + (Math.log(1
+            				+ (alpha * ((prefFR / lowFRBoundary) - 1)))
+            				/ alpha);
+            		dPi = ((-learningRate * wTerm))// + (0.9 * dPi))
+            				* (1 + noise);
+            		//thVal = 1;
+            	}
+            	prefFR += dPi * timeStep * invLogitDer((prefFR/estFRScale) - 1);
+            }
+            if(prefFR < .001){
+            	prefFR = .001;
+            }
             // Alter threshold to maintain firing rate
             // homeostasis at preferred firing rate
-            threshold += timeStep * threshold
-                    * (Math.exp((-deltaFR) / (fac * ipConst)) - 1);
-            if (Math.abs(deltaFR) > (0.05 * prefFR)) {
-                // Adjust the preferred firing rate so as to bring it closer to
-                // the preferred firing rate
-                double noise = ProbDistribution.NORMAL.nextRand(0, 0.05);
-                if (estFRScale > prefFR) {
-                    dPi = ((2.5 * learningRate * Math.exp(-prefFR
-                            / (beta * lowFRBoundary)))) // + (0.9 * dPi))
-                            * (1 + noise);
-                    prefFR += dPi * timeStep;
-                } else {
-                    if (prefFR <= lowFRBoundary) {
-                        dPi = ((-learningRate * (prefFR / lowFRBoundary)))
-                                // + (0.9 * dPi))
-                                * (1 + noise);
-                    } else {
-                        double wTerm = 1 + (Math.log(1
-                                + (alpha * ((prefFR / lowFRBoundary) - 1)))
-                                / alpha);
-                        dPi = ((-learningRate * wTerm))// + (0.9 * dPi))
-                                * (1 + noise);
-                    }
-                    prefFR += dPi * timeStep;
-                }
-            }
+            threshold += thVal * timeStep * threshold
+            		* (Math.exp((-deltaFR) / (prefFR * ipConst)) - 1);
         }
+    }
+    
+    private double invLogitDer(double a) {
+    	//return 1;
+    	if (Math.abs(a) > 2) return 1;
+    	return -4*(Math.exp(a*4)/(Math.pow(Math.exp(a*4) + 1, 2) ) ) + 1;
     }
 
     /**
@@ -709,11 +803,11 @@ public class IPIFRule extends SpikingNeuronUpdateRule implements
     }
 
     public boolean isFullNorm() {
-        return fullNorm;
+        return fullNormEx;
     }
 
     public void setFullNorm(boolean fullNorm) {
-        this.fullNorm = fullNorm;
+        this.fullNormEx = fullNorm;
     }
 
     public float getApproxFR() {

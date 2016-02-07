@@ -1,1 +1,0 @@
-http://vlado.fmf.uni-lj.si/pub/networks/Pajek/howto/execute.htm

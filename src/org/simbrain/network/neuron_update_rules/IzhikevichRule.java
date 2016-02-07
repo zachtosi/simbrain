@@ -18,6 +18,8 @@
  */
 package org.simbrain.network.neuron_update_rules;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 import org.simbrain.network.core.Neuron;
 import org.simbrain.network.core.SpikingNeuronUpdateRule;
 import org.simbrain.network.neuron_update_rules.interfaces.NoisyUpdateRule;
@@ -82,14 +84,14 @@ public class IzhikevichRule extends SpikingNeuronUpdateRule implements
     private double timeStep;
     private double inputs = 0;
     private double val;
+    public AtomicInteger upCount = new AtomicInteger(0);
     /**
      * {@inheritDoc}
      */
     @Override
     public void update(final Neuron neuron) {
+    	upCount.incrementAndGet();
         timeStep = neuron.getNetwork().getTimeStep();
-//        final boolean refractory = getLastSpikeTime() + refractoryPeriod
-//                >= neuron.getNetwork().getTime();
         final double activation = neuron.getActivation();
         double inputs = 0;
         inputs = inputType.getInput(neuron);

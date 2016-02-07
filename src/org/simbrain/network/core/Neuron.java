@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.simbrain.network.core.Network.TimeType;
 import org.simbrain.network.groups.Group;
@@ -336,6 +337,8 @@ public class Neuron {
         }
     }
 
+    public AtomicInteger syncCount = new AtomicInteger(0);
+    
     /**
      * A general purpose method that moves all relevant values from this
      * neuron's buffer to its main values. Must be used to ensure that spikes
@@ -343,6 +346,7 @@ public class Neuron {
      * updates.
      */
     public void setToBufferVals() {
+    	syncCount.incrementAndGet();
         setActivation(getBuffer());
         setSpike(getSpkBuffer());
     }

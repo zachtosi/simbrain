@@ -57,9 +57,7 @@ public class BufferedUpdateTask implements Task {
 				break;
 			}
 			hosts[i].update();
-			if (!hosts[i].getUpdateRule().isSkipsSynapticUpdates()) {
-				hosts[i].updateFanIn();
-			}
+			hosts[i].updateFanIn();
 		}
 	}
 

@@ -18,12 +18,7 @@
  */
 package org.simbrain.network.gui;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Cursor;
-import java.awt.Dialog;
-import java.awt.EventQueue;
-import java.awt.FlowLayout;
+import java.awt.*;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.geom.Point2D;
@@ -136,6 +131,7 @@ import org.simbrain.network.subnetworks.LMSNetwork;
 import org.simbrain.network.subnetworks.SOMGroup;
 import org.simbrain.network.subnetworks.SOMNetwork;
 import org.simbrain.network.subnetworks.SimpleRecurrentNetwork;
+import org.simbrain.network.util.CopyPaste;
 import org.simbrain.network.util.SimnetUtils;
 import org.simbrain.util.JMultiLineToolTip;
 import org.simbrain.util.StandardDialog;
@@ -296,7 +292,7 @@ public class NetworkPanel extends JPanel {
     protected JCheckBoxMenuItem synapseClampMenuItem = new JCheckBoxMenuItem();
 
     /** Beginning position used in calculating offsets for multiple pastes. */
-    private Point2D beginPosition;
+    private Point2D beginPosition = new Point2D.Double(0,0);
 
     /** End position used in calculating offsets for multiple pastes. */
     private Point2D endPosition;
@@ -938,7 +934,6 @@ public class NetworkPanel extends JPanel {
         NeuronNode node = new NeuronNode(this, neuron);
         canvas.getLayer().addChild(node);
         objectNodeMap.put(neuron, node);
-        // System.out.println(objectNodeMap.size());
         selectionModel.setSelection(Collections.singleton(node));
     }
 
@@ -1096,7 +1091,6 @@ public class NetworkPanel extends JPanel {
         // Add neuron group to canvas
         canvas.getLayer().addChild(neuronGroupNode);
         objectNodeMap.put(neuronGroup, neuronGroupNode);
-        // neuronGroupNode.updateBounds();
     }
 
     /**
@@ -1564,6 +1558,7 @@ public class NetworkPanel extends JPanel {
             mainTools.add(action);
         }
         mainTools.add(actionManager.getZoomToFitPageAction());
+        mainTools.add(actionManager.getSetAutoZoomToggleButton());
 
         return mainTools;
     }
@@ -1738,7 +1733,8 @@ public class NetworkPanel extends JPanel {
         setNumberOfPastes(0);
         setBeginPosition(SimnetUtils
             .getUpperLeft((ArrayList) getSelectedModelElements()));
-        Clipboard.add((ArrayList) this.getSelectedModelElements());
+        ArrayList deepCopy = CopyPaste.getCopy(this.getNetwork(),  (ArrayList) getSelectedModelElements());
+        Clipboard.add(deepCopy);  
     }
 
     /**
@@ -2475,7 +2471,7 @@ public class NetworkPanel extends JPanel {
      */
     public void setAutoZoomMode(final boolean autoZoomMode) {
         this.autoZoomMode = autoZoomMode;
-        actionManager.getSetAutoZoomMenuItem().setSelected(autoZoomMode);
+        actionManager.getSetAutoZoomToggleButton().setSelected(autoZoomMode);
         repaint();
     }
 

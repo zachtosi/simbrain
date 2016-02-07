@@ -155,18 +155,15 @@ public enum ProbDistribution {
     LOGNORMAL {
 
         @Override
+<<<<<<< HEAD
         public double nextRand(double mean, double std) {
-            // Convert mean and std so that they are the mean and
-            // standard deviation of the resulting lognormal distribution
-            // rather than the mean and standard deviation of the normal
-            // distribution beneath it.
-//            return Math.exp((ThreadLocalRandom.current().nextGaussian() * std)
-//                    + mean);
-            double mos = std / mean;
-            double correctedStd = Math.sqrt(Math.log((mos * mos) + 1));
-            double correctedMean = Math.log(mean / correctedStd);
             return LognormalGen.nextDouble(DEFAULT_RANDOM_STREAM,
-                correctedMean, correctedStd);
+                mean, std);
+=======
+        public double nextRand(double location, double scale) {
+            return LognormalGen.nextDouble(DEFAULT_RANDOM_STREAM,
+                location, scale);
+>>>>>>> simbrain/master
         }
 
         @Override
