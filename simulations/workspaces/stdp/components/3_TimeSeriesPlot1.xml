@@ -1,0 +1,419 @@
+<org.simbrain.plot.timeseries.TimeSeriesModel>
+  <dataset serialization="custom">
+    <org.jfree.data.general.AbstractDataset>
+      <default>
+        <group>
+          <id>NOID</id>
+        </group>
+      </default>
+    </org.jfree.data.general.AbstractDataset>
+    <org.jfree.data.xy.XYSeriesCollection>
+      <default>
+        <data>
+          <org.jfree.data.xy.XYSeries>
+            <key class="int">1</key>
+            <listeners serialization="custom">
+              <javax.swing.event.EventListenerList>
+                <default/>
+                <string>org.jfree.data.general.SeriesChangeListener</string>
+                <org.jfree.data.xy.XYSeriesCollection reference="../../../../../../.."/>
+                <null/>
+              </javax.swing.event.EventListenerList>
+            </listeners>
+            <propertyChangeSupport serialization="custom">
+              <java.beans.PropertyChangeSupport>
+                <default>
+                  <source class="org.jfree.data.xy.XYSeries" reference="../../../.."/>
+                  <propertyChangeSupportSerializedDataVersion>2</propertyChangeSupportSerializedDataVersion>
+                </default>
+                <null/>
+              </java.beans.PropertyChangeSupport>
+            </propertyChangeSupport>
+            <vetoableChangeSupport serialization="custom">
+              <java.beans.VetoableChangeSupport>
+                <default>
+                  <source class="org.jfree.data.xy.XYSeries" reference="../../../.."/>
+                  <vetoableChangeSupportSerializedDataVersion>2</vetoableChangeSupportSerializedDataVersion>
+                </default>
+                <org.jfree.data.xy.XYSeriesCollection reference="../../../../../../.."/>
+                <null/>
+              </java.beans.VetoableChangeSupport>
+            </vetoableChangeSupport>
+            <notify>true</notify>
+            <data/>
+            <maximumItemCount>2147483647</maximumItemCount>
+            <autoSort>true</autoSort>
+            <allowDuplicateXValues>true</allowDuplicateXValues>
+            <minX>NaN</minX>
+            <maxX>NaN</maxX>
+            <minY>NaN</minY>
+            <maxY>NaN</maxY>
+          </org.jfree.data.xy.XYSeries>
+          <org.jfree.data.xy.XYSeries>
+            <key class="int">2</key>
+            <listeners serialization="custom">
+              <javax.swing.event.EventListenerList>
+                <default/>
+                <string>org.jfree.data.general.SeriesChangeListener</string>
+                <org.jfree.data.xy.XYSeriesCollection reference="../../../../../../.."/>
+                <null/>
+              </javax.swing.event.EventListenerList>
+            </listeners>
+            <propertyChangeSupport serialization="custom">
+              <java.beans.PropertyChangeSupport>
+                <default>
+                  <source class="org.jfree.data.xy.XYSeries" reference="../../../.."/>
+                  <propertyChangeSupportSerializedDataVersion>2</propertyChangeSupportSerializedDataVersion>
+                </default>
+                <null/>
+              </java.beans.PropertyChangeSupport>
+            </propertyChangeSupport>
+            <vetoableChangeSupport serialization="custom">
+              <java.beans.VetoableChangeSupport>
+                <default>
+                  <source class="org.jfree.data.xy.XYSeries" reference="../../../.."/>
+                  <vetoableChangeSupportSerializedDataVersion>2</vetoableChangeSupportSerializedDataVersion>
+                </default>
+                <org.jfree.data.xy.XYSeriesCollection reference="../../../../../../.."/>
+                <null/>
+              </java.beans.VetoableChangeSupport>
+            </vetoableChangeSupport>
+            <notify>true</notify>
+            <data/>
+            <maximumItemCount>2147483647</maximumItemCount>
+            <autoSort>true</autoSort>
+            <allowDuplicateXValues>true</allowDuplicateXValues>
+            <minX>NaN</minX>
+            <maxX>NaN</maxX>
+            <minY>NaN</minY>
+            <maxY>NaN</maxY>
+          </org.jfree.data.xy.XYSeries>
+          <org.jfree.data.xy.XYSeries>
+            <key class="int">3</key>
+            <listeners serialization="custom">
+              <javax.swing.event.EventListenerList>
+                <default/>
+                <string>org.jfree.data.general.SeriesChangeListener</string>
+                <org.jfree.data.xy.XYSeriesCollection reference="../../../../../../.."/>
+                <null/>
+              </javax.swing.event.EventListenerList>
+            </listeners>
+            <propertyChangeSupport serialization="custom">
+              <java.beans.PropertyChangeSupport>
+                <default>
+                  <source class="org.jfree.data.xy.XYSeries" reference="../../../.."/>
+                  <propertyChangeSupportSerializedDataVersion>2</propertyChangeSupportSerializedDataVersion>
+                </default>
+                <null/>
+              </java.beans.PropertyChangeSupport>
+            </propertyChangeSupport>
+            <vetoableChangeSupport serialization="custom">
+              <java.beans.VetoableChangeSupport>
+                <default>
+                  <source class="org.jfree.data.xy.XYSeries" reference="../../../.."/>
+                  <vetoableChangeSupportSerializedDataVersion>2</vetoableChangeSupportSerializedDataVersion>
+                </default>
+                <org.jfree.data.xy.XYSeriesCollection reference="../../../../../../.."/>
+                <null/>
+              </java.beans.VetoableChangeSupport>
+            </vetoableChangeSupport>
+            <notify>true</notify>
+            <data/>
+            <maximumItemCount>2147483647</maximumItemCount>
+            <autoSort>true</autoSort>
+            <allowDuplicateXValues>true</allowDuplicateXValues>
+            <minX>NaN</minX>
+            <maxX>NaN</maxX>
+            <minY>NaN</minY>
+            <maxY>NaN</maxY>
+          </org.jfree.data.xy.XYSeries>
+          <org.jfree.data.xy.XYSeries>
+            <key class="int">4</key>
+            <listeners serialization="custom">
+              <javax.swing.event.EventListenerList>
+                <default/>
+                <string>org.jfree.data.general.SeriesChangeListener</string>
+                <org.jfree.data.xy.XYSeriesCollection reference="../../../../../../.."/>
+                <null/>
+              </javax.swing.event.EventListenerList>
+            </listeners>
+            <propertyChangeSupport serialization="custom">
+              <java.beans.PropertyChangeSupport>
+                <default>
+                  <source class="org.jfree.data.xy.XYSeries" reference="../../../.."/>
+                  <propertyChangeSupportSerializedDataVersion>2</propertyChangeSupportSerializedDataVersion>
+                </default>
+                <null/>
+              </java.beans.PropertyChangeSupport>
+            </propertyChangeSupport>
+            <vetoableChangeSupport serialization="custom">
+              <java.beans.VetoableChangeSupport>
+                <default>
+                  <source class="org.jfree.data.xy.XYSeries" reference="../../../.."/>
+                  <vetoableChangeSupportSerializedDataVersion>2</vetoableChangeSupportSerializedDataVersion>
+                </default>
+                <org.jfree.data.xy.XYSeriesCollection reference="../../../../../../.."/>
+                <null/>
+              </java.beans.VetoableChangeSupport>
+            </vetoableChangeSupport>
+            <notify>true</notify>
+            <data/>
+            <maximumItemCount>2147483647</maximumItemCount>
+            <autoSort>true</autoSort>
+            <allowDuplicateXValues>true</allowDuplicateXValues>
+            <minX>NaN</minX>
+            <maxX>NaN</maxX>
+            <minY>NaN</minY>
+            <maxY>NaN</maxY>
+          </org.jfree.data.xy.XYSeries>
+          <org.jfree.data.xy.XYSeries>
+            <key class="int">5</key>
+            <listeners serialization="custom">
+              <javax.swing.event.EventListenerList>
+                <default/>
+                <string>org.jfree.data.general.SeriesChangeListener</string>
+                <org.jfree.data.xy.XYSeriesCollection reference="../../../../../../.."/>
+                <null/>
+              </javax.swing.event.EventListenerList>
+            </listeners>
+            <propertyChangeSupport serialization="custom">
+              <java.beans.PropertyChangeSupport>
+                <default>
+                  <source class="org.jfree.data.xy.XYSeries" reference="../../../.."/>
+                  <propertyChangeSupportSerializedDataVersion>2</propertyChangeSupportSerializedDataVersion>
+                </default>
+                <null/>
+              </java.beans.PropertyChangeSupport>
+            </propertyChangeSupport>
+            <vetoableChangeSupport serialization="custom">
+              <java.beans.VetoableChangeSupport>
+                <default>
+                  <source class="org.jfree.data.xy.XYSeries" reference="../../../.."/>
+                  <vetoableChangeSupportSerializedDataVersion>2</vetoableChangeSupportSerializedDataVersion>
+                </default>
+                <org.jfree.data.xy.XYSeriesCollection reference="../../../../../../.."/>
+                <null/>
+              </java.beans.VetoableChangeSupport>
+            </vetoableChangeSupport>
+            <notify>true</notify>
+            <data/>
+            <maximumItemCount>2147483647</maximumItemCount>
+            <autoSort>true</autoSort>
+            <allowDuplicateXValues>true</allowDuplicateXValues>
+            <minX>NaN</minX>
+            <maxX>NaN</maxX>
+            <minY>NaN</minY>
+            <maxY>NaN</maxY>
+          </org.jfree.data.xy.XYSeries>
+          <org.jfree.data.xy.XYSeries>
+            <key class="int">6</key>
+            <listeners serialization="custom">
+              <javax.swing.event.EventListenerList>
+                <default/>
+                <string>org.jfree.data.general.SeriesChangeListener</string>
+                <org.jfree.data.xy.XYSeriesCollection reference="../../../../../../.."/>
+                <null/>
+              </javax.swing.event.EventListenerList>
+            </listeners>
+            <propertyChangeSupport serialization="custom">
+              <java.beans.PropertyChangeSupport>
+                <default>
+                  <source class="org.jfree.data.xy.XYSeries" reference="../../../.."/>
+                  <propertyChangeSupportSerializedDataVersion>2</propertyChangeSupportSerializedDataVersion>
+                </default>
+                <null/>
+              </java.beans.PropertyChangeSupport>
+            </propertyChangeSupport>
+            <vetoableChangeSupport serialization="custom">
+              <java.beans.VetoableChangeSupport>
+                <default>
+                  <source class="org.jfree.data.xy.XYSeries" reference="../../../.."/>
+                  <vetoableChangeSupportSerializedDataVersion>2</vetoableChangeSupportSerializedDataVersion>
+                </default>
+                <org.jfree.data.xy.XYSeriesCollection reference="../../../../../../.."/>
+                <null/>
+              </java.beans.VetoableChangeSupport>
+            </vetoableChangeSupport>
+            <notify>true</notify>
+            <data/>
+            <maximumItemCount>2147483647</maximumItemCount>
+            <autoSort>true</autoSort>
+            <allowDuplicateXValues>true</allowDuplicateXValues>
+            <minX>NaN</minX>
+            <maxX>NaN</maxX>
+            <minY>NaN</minY>
+            <maxY>NaN</maxY>
+          </org.jfree.data.xy.XYSeries>
+          <org.jfree.data.xy.XYSeries>
+            <key class="int">7</key>
+            <listeners serialization="custom">
+              <javax.swing.event.EventListenerList>
+                <default/>
+                <string>org.jfree.data.general.SeriesChangeListener</string>
+                <org.jfree.data.xy.XYSeriesCollection reference="../../../../../../.."/>
+                <null/>
+              </javax.swing.event.EventListenerList>
+            </listeners>
+            <propertyChangeSupport serialization="custom">
+              <java.beans.PropertyChangeSupport>
+                <default>
+                  <source class="org.jfree.data.xy.XYSeries" reference="../../../.."/>
+                  <propertyChangeSupportSerializedDataVersion>2</propertyChangeSupportSerializedDataVersion>
+                </default>
+                <null/>
+              </java.beans.PropertyChangeSupport>
+            </propertyChangeSupport>
+            <vetoableChangeSupport serialization="custom">
+              <java.beans.VetoableChangeSupport>
+                <default>
+                  <source class="org.jfree.data.xy.XYSeries" reference="../../../.."/>
+                  <vetoableChangeSupportSerializedDataVersion>2</vetoableChangeSupportSerializedDataVersion>
+                </default>
+                <org.jfree.data.xy.XYSeriesCollection reference="../../../../../../.."/>
+                <null/>
+              </java.beans.VetoableChangeSupport>
+            </vetoableChangeSupport>
+            <notify>true</notify>
+            <data/>
+            <maximumItemCount>2147483647</maximumItemCount>
+            <autoSort>true</autoSort>
+            <allowDuplicateXValues>true</allowDuplicateXValues>
+            <minX>NaN</minX>
+            <maxX>NaN</maxX>
+            <minY>NaN</minY>
+            <maxY>NaN</maxY>
+          </org.jfree.data.xy.XYSeries>
+          <org.jfree.data.xy.XYSeries>
+            <key class="int">8</key>
+            <listeners serialization="custom">
+              <javax.swing.event.EventListenerList>
+                <default/>
+                <string>org.jfree.data.general.SeriesChangeListener</string>
+                <org.jfree.data.xy.XYSeriesCollection reference="../../../../../../.."/>
+                <null/>
+              </javax.swing.event.EventListenerList>
+            </listeners>
+            <propertyChangeSupport serialization="custom">
+              <java.beans.PropertyChangeSupport>
+                <default>
+                  <source class="org.jfree.data.xy.XYSeries" reference="../../../.."/>
+                  <propertyChangeSupportSerializedDataVersion>2</propertyChangeSupportSerializedDataVersion>
+                </default>
+                <null/>
+              </java.beans.PropertyChangeSupport>
+            </propertyChangeSupport>
+            <vetoableChangeSupport serialization="custom">
+              <java.beans.VetoableChangeSupport>
+                <default>
+                  <source class="org.jfree.data.xy.XYSeries" reference="../../../.."/>
+                  <vetoableChangeSupportSerializedDataVersion>2</vetoableChangeSupportSerializedDataVersion>
+                </default>
+                <org.jfree.data.xy.XYSeriesCollection reference="../../../../../../.."/>
+                <null/>
+              </java.beans.VetoableChangeSupport>
+            </vetoableChangeSupport>
+            <notify>true</notify>
+            <data/>
+            <maximumItemCount>2147483647</maximumItemCount>
+            <autoSort>true</autoSort>
+            <allowDuplicateXValues>true</allowDuplicateXValues>
+            <minX>NaN</minX>
+            <maxX>NaN</maxX>
+            <minY>NaN</minY>
+            <maxY>NaN</maxY>
+          </org.jfree.data.xy.XYSeries>
+          <org.jfree.data.xy.XYSeries>
+            <key class="int">9</key>
+            <listeners serialization="custom">
+              <javax.swing.event.EventListenerList>
+                <default/>
+                <string>org.jfree.data.general.SeriesChangeListener</string>
+                <org.jfree.data.xy.XYSeriesCollection reference="../../../../../../.."/>
+                <null/>
+              </javax.swing.event.EventListenerList>
+            </listeners>
+            <propertyChangeSupport serialization="custom">
+              <java.beans.PropertyChangeSupport>
+                <default>
+                  <source class="org.jfree.data.xy.XYSeries" reference="../../../.."/>
+                  <propertyChangeSupportSerializedDataVersion>2</propertyChangeSupportSerializedDataVersion>
+                </default>
+                <null/>
+              </java.beans.PropertyChangeSupport>
+            </propertyChangeSupport>
+            <vetoableChangeSupport serialization="custom">
+              <java.beans.VetoableChangeSupport>
+                <default>
+                  <source class="org.jfree.data.xy.XYSeries" reference="../../../.."/>
+                  <vetoableChangeSupportSerializedDataVersion>2</vetoableChangeSupportSerializedDataVersion>
+                </default>
+                <org.jfree.data.xy.XYSeriesCollection reference="../../../../../../.."/>
+                <null/>
+              </java.beans.VetoableChangeSupport>
+            </vetoableChangeSupport>
+            <notify>true</notify>
+            <data/>
+            <maximumItemCount>2147483647</maximumItemCount>
+            <autoSort>true</autoSort>
+            <allowDuplicateXValues>true</allowDuplicateXValues>
+            <minX>NaN</minX>
+            <maxX>NaN</maxX>
+            <minY>NaN</minY>
+            <maxY>NaN</maxY>
+          </org.jfree.data.xy.XYSeries>
+          <org.jfree.data.xy.XYSeries>
+            <key class="int">10</key>
+            <listeners serialization="custom">
+              <javax.swing.event.EventListenerList>
+                <default/>
+                <string>org.jfree.data.general.SeriesChangeListener</string>
+                <org.jfree.data.xy.XYSeriesCollection reference="../../../../../../.."/>
+                <null/>
+              </javax.swing.event.EventListenerList>
+            </listeners>
+            <propertyChangeSupport serialization="custom">
+              <java.beans.PropertyChangeSupport>
+                <default>
+                  <source class="org.jfree.data.xy.XYSeries" reference="../../../.."/>
+                  <propertyChangeSupportSerializedDataVersion>2</propertyChangeSupportSerializedDataVersion>
+                </default>
+                <null/>
+              </java.beans.PropertyChangeSupport>
+            </propertyChangeSupport>
+            <vetoableChangeSupport serialization="custom">
+              <java.beans.VetoableChangeSupport>
+                <default>
+                  <source class="org.jfree.data.xy.XYSeries" reference="../../../.."/>
+                  <vetoableChangeSupportSerializedDataVersion>2</vetoableChangeSupportSerializedDataVersion>
+                </default>
+                <org.jfree.data.xy.XYSeriesCollection reference="../../../../../../.."/>
+                <null/>
+              </java.beans.VetoableChangeSupport>
+            </vetoableChangeSupport>
+            <notify>true</notify>
+            <data/>
+            <maximumItemCount>2147483647</maximumItemCount>
+            <autoSort>true</autoSort>
+            <allowDuplicateXValues>true</allowDuplicateXValues>
+            <minX>NaN</minX>
+            <maxX>NaN</maxX>
+            <minY>NaN</minY>
+            <maxY>NaN</maxY>
+          </org.jfree.data.xy.XYSeries>
+        </data>
+        <intervalDelegate>
+          <dataset class="org.jfree.data.xy.XYSeriesCollection" reference="../../../.."/>
+          <autoWidth>false</autoWidth>
+          <intervalPositionFactor>0.5</intervalPositionFactor>
+          <fixedIntervalWidth>1.0</fixedIntervalWidth>
+          <autoIntervalWidth>Infinity</autoIntervalWidth>
+        </intervalDelegate>
+      </default>
+    </org.jfree.data.xy.XYSeriesCollection>
+  </dataset>
+  <autoRange>true</autoRange>
+  <windowSize>100</windowSize>
+  <rangeUpperBound>1.0</rangeUpperBound>
+  <rangeLowerBound>0.0</rangeLowerBound>
+  <fixedWidth>true</fixedWidth>
+</org.simbrain.plot.timeseries.TimeSeriesModel>

@@ -1,0 +1,17 @@
+<html>
+<body>
+<h1>STDP (Spike Timing Dependent Plasticity)</h1>
+<br>
+<a href="http://www.scholarpedia.org/article/Spike-timing_dependent_plasticity"> 
+STDP</a> is a form of synaptic plasticity whereby when one neuron ("pre") fires before another to which its
+connected ("post") synapse is strengthened, whereas when post fires before pre, the synapse is weakened. 
+Intutively causal stimulation strengthens the connection, while intuitively anti-causal stimulation weakens the
+connection.
+<br><br>
+In this simulation the pre and post neurons are coupled to the first and second columns of the table.
+Things are currently set up so that the connection will strengthen, since a 1 occurs in the pre column
+(column 1) before the 1 in the post column (column 2). To set it up for anti-causal weakening, adjust
+the table so that a 1 occurs in column 2 first.   You can also adjust the time-lag between the signals
+and observe its effect on rate of learning. To edit the synapse and its stdp rule double click on it.
+</body>
+</html>

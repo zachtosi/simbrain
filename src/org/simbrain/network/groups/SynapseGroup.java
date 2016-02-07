@@ -1097,13 +1097,8 @@ public class SynapseGroup extends Group {
      *      0   3   5.3
      *      1   2   .9
      */
-<<<<<<< HEAD
     public <T> T [][] getMatrixOfValues(SynapseParameterGetter<T> getter,
             T[][] valMat) {
-=======
-    public Number [][] getNumericIndices(SynapseParameterGetter<Number> getter) {
-        Number [][] pairs = new Number[size()][3];
->>>>>>> simbrain/master
         int i = 0;
         int j = 0;
         // Create numbers for neurons... less expensive than constant
@@ -1120,47 +1115,12 @@ public class SynapseGroup extends Group {
         for (Neuron n : getTargetNeurons()) {
             targetMap.put(n, j++);
         }
-<<<<<<< HEAD
         for (Synapse s : getAllSynapses()) {
                 valMat[sourceMap.get(s.getSource())]
                         [targetMap.get(s.getTarget())]
                                 = getter.getParameterFromSynapse(s);
         }
         return valMat;
-=======
-        // Put each synapse strength into a table [i, j, w], where i is the
-        // source neuron index in a weight matrix, j is the target index and
-        // w is the synapse strength. 
-        int k = 0;
-        for (Synapse s : getAllSynapses()) {
-            pairs[k++] = new Number[] { sourceMap.get(s.getSource()),
-                    targetMap.get(s.getTarget()),
-                    getter.getParameterFromSynapse(s) };
-        }
-        // Create a comparator to sort synapse table entries by source, then
-        // by column.
-        Comparator<Number[]> rowColOrderer = new Comparator<Number[]>() {
-            @Override
-            public int compare(Number[] o1, Number[] o2) {
-                if (o1[0].doubleValue() < o2[0].doubleValue()) {
-                    return -1;
-                } else if (o1[0].doubleValue() > o2[0].doubleValue()) {
-                    return 1;
-                } else {
-                    if (o1[1].doubleValue() < o2[1].doubleValue()) {
-                        return -1;
-                    } else if (o1[1].doubleValue() > o2[1].doubleValue()) {
-                        return 1;
-                    } else {
-                        return 0;
-                    }
-                }
-            }
-        };
-        // And sort the table
-        Arrays.sort(pairs, rowColOrderer);
-        return pairs;
->>>>>>> simbrain/master
     }
 
     /**

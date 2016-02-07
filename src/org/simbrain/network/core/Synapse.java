@@ -48,10 +48,10 @@ public class Synapse {
     private static final SpikeResponder DEFAULT_SPIKE_RESPONDER = new JumpAndDecay();
 
     /** Default upper bound. */
-    private static double DEFAULT_UPPER_BOUND = 10;
+    private static double DEFAULT_UPPER_BOUND = 1000;
 
     /** Default lower bound. */
-    private static double DEFAULT_LOWER_BOUND = -10;
+    private static double DEFAULT_LOWER_BOUND = -1000;
 
     /**
      * Parent network. Can't just use getSouce().getParent() because synapses
@@ -90,17 +90,10 @@ public class Synapse {
     private double increment = 1;
 
     /** Upper limit of synapse. */
-<<<<<<< HEAD
-    private double upperBound = 1000000;
-
-    /** Lower limit of synapse. */
-    private double lowerBound = -1000000;
-=======
     private double upperBound = DEFAULT_UPPER_BOUND;
 
     /** Lower limit of synapse. */
     private double lowerBound = DEFAULT_LOWER_BOUND;
->>>>>>> simbrain/master
 
     /** Time to delay sending activation to target neuron. */
     private int delay;
@@ -762,7 +755,6 @@ public class Synapse {
         return delay;
     }
 
-<<<<<<< HEAD
 //    /**
 //     * @return the deque.
 //     */
@@ -786,30 +778,6 @@ public class Synapse {
 //            delayManager[dlyPtr - 1] = val;
 //        }
 //    }
-=======
-    /**
-     * @return the deque.
-     */
-    private double dequeu() {
-        if (dlyPtr == delay) {
-            dlyPtr = 0;
-        }
-        return delayManager[dlyPtr++];
-    }
-
-    /**
-     * Enqueeu.
-     *
-     * @param val Value to enqueu
-     */
-    private void enqueu(final double val) {
-        if (dlyPtr == 0) {
-            delayManager[delay - 1] = val;
-        } else {
-            delayManager[dlyPtr - 1] = val;
-        }
-    }
->>>>>>> simbrain/master
 
     @Override
     public String toString() {

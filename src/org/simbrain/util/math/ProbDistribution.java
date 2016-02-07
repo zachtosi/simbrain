@@ -155,15 +155,9 @@ public enum ProbDistribution {
     LOGNORMAL {
 
         @Override
-<<<<<<< HEAD
         public double nextRand(double mean, double std) {
             return LognormalGen.nextDouble(DEFAULT_RANDOM_STREAM,
                 mean, std);
-=======
-        public double nextRand(double location, double scale) {
-            return LognormalGen.nextDouble(DEFAULT_RANDOM_STREAM,
-                location, scale);
->>>>>>> simbrain/master
         }
 
         @Override
