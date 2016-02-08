@@ -38,9 +38,6 @@ public class FitzhughNagumo extends SpikingNeuronUpdateRule implements
     /** Constant background current. KEEP */
     private double iBg = 1;
 
-    /** Threshold value to signal a spike. KEEP */
-    private double threshold = 1.9;
-
     /** Noise dialog. */
     private Randomizer noiseGenerator = new Randomizer();
 
@@ -56,6 +53,9 @@ public class FitzhughNagumo extends SpikingNeuronUpdateRule implements
     /** Recovery self-dependence. */
     private double c = 0.8;
 
+    public FitzhughNagumo() {
+        setThreshold(1.9);
+    }
 
     /**
      * {@inheritDoc}
@@ -89,7 +89,7 @@ public class FitzhughNagumo extends SpikingNeuronUpdateRule implements
 
         v = activation + (timeStep * (activation - (Math.pow(activation, 3)/3) - w + inputs) );
         // You want this
-        if (v >= threshold) {
+        if (v >= getThreshold()) {
             neuron.setSpkBuffer(true);
             setHasSpiked(true, neuron);
         } else {
@@ -107,7 +107,7 @@ public class FitzhughNagumo extends SpikingNeuronUpdateRule implements
     public double getRandomValue() {
         // Equal chance of spiking or not spiking, taking on any value between
         // the resting potential and the threshold if not.
-        return 2 * (threshold - c) * Math.random() + c;
+        return 2 * (getThreshold() - c) * Math.random() + c;
     }
 
     /**
@@ -177,14 +177,6 @@ public class FitzhughNagumo extends SpikingNeuronUpdateRule implements
     @Override
     public String getDescription() {
         return "FitzhughNagumo";
-    }
-
-    public double getThreshold() {
-        return threshold;
-    }
-
-    public void setThreshold(double threshold) {
-        this.threshold = threshold;
     }
 
     public double getA() {

@@ -32,15 +32,16 @@ import org.simbrain.util.randomizer.Randomizer;
 public class SpikingThresholdRule extends SpikingNeuronUpdateRule implements
     NoisyUpdateRule {
 
-    /** Threshold. */
-    private double threshold = .5;
-
     /** The noise generating randomizer. */
     private Randomizer noiseGenerator = new Randomizer();
 
     /** Whether or not to add noise to the inputs .*/
     private boolean addNoise;
 
+    public SpikingThresholdRule() {
+        setThreshold(.5);
+    }
+    
     @Override
     public SpikingThresholdRule deepCopy() {
         SpikingThresholdRule neuron = new SpikingThresholdRule();
@@ -52,7 +53,7 @@ public class SpikingThresholdRule extends SpikingNeuronUpdateRule implements
     public void update(Neuron neuron) {
         final double input = inputType.getInput(neuron)
                 + (addNoise ? noiseGenerator.getRandom() : 0);
-        if (input >= threshold) {
+        if (input >= getThreshold()) {
             neuron.setSpkBuffer(true);
             setHasSpiked(true, neuron);
             neuron.setBuffer(1);
@@ -71,20 +72,6 @@ public class SpikingThresholdRule extends SpikingNeuronUpdateRule implements
     public double getRandomValue() {
         Random rand = new Random();
         return rand.nextBoolean() ? 1 : 0;
-    }
-
-    /**
-     * @return the threshold
-     */
-    public double getThreshold() {
-        return threshold;
-    }
-
-    /**
-     * @param threshold the threshold to set
-     */
-    public void setThreshold(double threshold) {
-        this.threshold = threshold;
     }
 
     @Override

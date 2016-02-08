@@ -42,9 +42,6 @@ public class IntegrateAndFireRule extends SpikingNeuronUpdateRule implements
     /** Time constant (ms) */
     private double timeConstant = 30;
 
-    /** Threshold (mV) */
-    private double threshold = 15;
-
     /** Reset potential (mV) */
     private double resetPotential = 13.5;
 
@@ -66,6 +63,10 @@ public class IntegrateAndFireRule extends SpikingNeuronUpdateRule implements
     @Deprecated
     private boolean hasSpiked;
 
+    public IntegrateAndFireRule() {
+        setThreshold(15);
+    }
+    
     /**
      * {@inheritDoc}
      */
@@ -118,7 +119,7 @@ public class IntegrateAndFireRule extends SpikingNeuronUpdateRule implements
 
         memPotential += dVm;
 
-        if (memPotential >= threshold) {
+        if (memPotential >= getThreshold()) {
             neuron.setSpkBuffer(true);
             setHasSpiked(true, neuron);
             memPotential = resetPotential;
@@ -137,7 +138,7 @@ public class IntegrateAndFireRule extends SpikingNeuronUpdateRule implements
     public double getRandomValue() {
         // Equal chance of spiking or not spiking, taking on any value between
         // the resting potential and the threshold if not.
-        return 2 * (threshold - restingPotential) * Math.random()
+        return 2 * (getThreshold() - restingPotential) * Math.random()
             + restingPotential;
     }
 
@@ -237,21 +238,6 @@ public class IntegrateAndFireRule extends SpikingNeuronUpdateRule implements
      */
     public void setBackgroundCurrent(double backgroundCurrent) {
         this.backgroundCurrent = backgroundCurrent;
-    }
-
-    /**
-     * @return Returns the threshold.
-     */
-    public double getThreshold() {
-        return threshold;
-    }
-
-    /**
-     * @param threshold
-     *            The threshold to set.
-     */
-    public void setThreshold(final double threshold) {
-        this.threshold = threshold;
     }
 
     /**

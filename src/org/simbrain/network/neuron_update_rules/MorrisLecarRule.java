@@ -1,7 +1,7 @@
 package org.simbrain.network.neuron_update_rules;
 
 /**
- * 
+ * TODO: Add absolute refractory period or otherwise address the "smeared" spikes
  * @author Zach Tosi
  */
 import org.simbrain.network.core.Neuron;
@@ -56,15 +56,16 @@ public class MorrisLecarRule extends SpikingNeuronUpdateRule
 	/** Background current (nA). */
 	private double i_bg = 46;
 	
-	/** Threshold for neurotransmitter release (mV) */
-	private double threshold = 40;
-	
 	/** A source of noise (nA). */
 	private Randomizer noiseGenerator = new Randomizer();
 	
 	{
 		noiseGenerator.setPdf(ProbDistribution.NORMAL);
 		noiseGenerator.setParam2(1);
+	}
+	
+	public MorrisLecarRule() {
+	    setThreshold(40);
 	}
 	
 	@Override
@@ -82,8 +83,8 @@ public class MorrisLecarRule extends SpikingNeuronUpdateRule
 		vMembrane = vMembrane + (dt/2) * ((dVdt) + dVdt(vmFut, i_syn));
 		w_K = w_K + (dt/2) * ((dWdt) + dWdt(vMembrane, wKFut));
 		
-		neuron.setSpkBuffer(vMembrane > threshold);
-		setHasSpiked(vMembrane > threshold, neuron);
+		neuron.setSpkBuffer(vMembrane > getThreshold());
+		setHasSpiked(vMembrane > getThreshold(), neuron);
 
 		neuron.setBuffer(vMembrane);
 		
@@ -133,7 +134,7 @@ public class MorrisLecarRule extends SpikingNeuronUpdateRule
 		cpy.v_m2 = this.v_m2;
 		cpy.v_w1 = this.v_w1;
 		cpy.v_w2 = this.v_w2;
-		cpy.threshold = this.threshold;
+		cpy.setThreshold(getThreshold());
 		cpy.vRest_Ca = this.vRest_Ca;
 		cpy.vRest_k = this.vRest_k;
 		cpy.vRest_L = this.vRest_L;
@@ -274,14 +275,6 @@ public class MorrisLecarRule extends SpikingNeuronUpdateRule
 
 	public void setI_bg(double i_bg) {
 		this.i_bg = i_bg;
-	}
-
-	public double getThreshold() {
-		return threshold;
-	}
-
-	public void setThreshold(double threshold) {
-		this.threshold = threshold;
 	}
 
 }

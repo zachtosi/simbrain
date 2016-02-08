@@ -111,6 +111,8 @@ public class AdExIFRule extends SpikingNeuronUpdateRule implements
 
 	/** The noise generator randomizer. */
 	private Randomizer noiseGenerator = new Randomizer();
+	
+	private boolean equatePeakWithThresh = false;
 
 	/**
 	 * An absolute refractory period. Not normally a part of AdEx, but can
@@ -392,4 +394,17 @@ public class AdExIFRule extends SpikingNeuronUpdateRule implements
         this.refractoryPeriod = refractoryPeriod;
     }
 
+    public double getThreshold() {
+        return equatePeakWithThresh ? v_Peak : v_Th;
+    }
+    
+    public void setThreshold(double threshold) {
+        if (equatePeakWithThresh) {
+            v_Peak = threshold;
+        } else {
+            v_Th = threshold;
+        }
+        super.setThreshold(threshold);
+    }
+    
 }

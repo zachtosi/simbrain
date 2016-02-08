@@ -42,6 +42,8 @@ public abstract class SpikingNeuronUpdateRule extends NeuronUpdateRule {
     private int spikeCounter = 0;
     
     private double startTime = 0;
+    
+    private double threshold;
 
     @Override
     public void clear(Neuron neuron) {
@@ -116,6 +118,14 @@ public abstract class SpikingNeuronUpdateRule extends NeuronUpdateRule {
     @Override
     public final boolean isSpikingNeuron() {
         return true;
+    }
+
+    public double getThreshold() {
+        return threshold;
+    }
+
+    public void setThreshold(double threshold) {
+        this.threshold = threshold;
     }
 
 }

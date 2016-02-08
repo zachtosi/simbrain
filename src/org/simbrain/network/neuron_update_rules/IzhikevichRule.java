@@ -52,9 +52,6 @@ public class IzhikevichRule extends SpikingNeuronUpdateRule implements
     /** Constant background current. */
     private double iBg = 14;
 
-    /** Threshold value to signal a spike. */
-    private double threshold = 30;
-
     /** Noise dialog. */
     private Randomizer noiseGenerator = new Randomizer();
 
@@ -67,6 +64,10 @@ public class IzhikevichRule extends SpikingNeuronUpdateRule implements
      */
     private double refractoryPeriod = 0.0; //ms
 
+    public IzhikevichRule() {
+        setThreshold(30);
+    }
+    
     /**
      * {@inheritDoc}
      */
@@ -106,7 +107,7 @@ public class IzhikevichRule extends SpikingNeuronUpdateRule implements
                 + (5 * activation) + 140)
                 - recovery + inputs));
 
-        if (val >= threshold) {
+        if (val >= getThreshold()) {
             val = c;
             recovery += d;
             neuron.setSpkBuffer(true);
@@ -126,7 +127,7 @@ public class IzhikevichRule extends SpikingNeuronUpdateRule implements
     public double getRandomValue() {
         // Equal chance of spiking or not spiking, taking on any value between
         // the resting potential and the threshold if not.
-        return 2 * (threshold - c) * Math.random() + c;
+        return 2 * (getThreshold() - c) * Math.random() + c;
     }
 
     /**
@@ -224,14 +225,6 @@ public class IzhikevichRule extends SpikingNeuronUpdateRule implements
     @Override
     public String getDescription() {
         return "Izhikevich";
-    }
-
-    public double getThreshold() {
-        return threshold;
-    }
-
-    public void setThreshold(double threshold) {
-        this.threshold = threshold;
     }
 
     public double getRefractoryPeriod() {
